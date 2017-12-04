@@ -17,6 +17,7 @@ import edu.stanford.nlp.simple.Sentence;
 
 public class Article extends Docu implements IModel{
 	
+	private String id;
 	private String title;
 	private String description;
 	private List<Sentence> sentences;
@@ -27,7 +28,8 @@ public class Article extends Docu implements IModel{
 	private List<String> known_entities;
 	private Date timestamp;
 	
-	public Article(String title, String description){
+	public Article(String id, String title, String description){
+		this.id = id;
 		this.title = title;
 		this.description = description;
 		populateTriples();
@@ -35,22 +37,29 @@ public class Article extends Docu implements IModel{
 	
 	public void populateTriples(){
 		Document document =  new Document(this.getDescription());
-		sentences = document.sentences();
+		this.sentences = document.sentences();
 		triples = new ArrayList<RelationTriple>();
 		
 	    for (Sentence sent : sentences) {
 		   for (RelationTriple triple : sent.openieTriples()) 
 			   triples.add(triple);
-		}
-
+	    }		
 	}
 	
 	/*
 	 * Getters 
 	 */
 	
+	public String getDocumentID(){
+		return this.id;
+	}
+	
 	public List<RelationTriple> getTriples(){
 		return this.triples;
+	}
+	
+	public List<Sentence> getSentences(){
+		return this.sentences;
 	}
 	
 	public String getTitle(){

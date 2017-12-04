@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.elasticsearch.action.search.SearchResponse;
@@ -28,6 +29,7 @@ import extractor.lib.Preprocessor;
 import extractor.lib.TextProcessor;
 import extractor.models.Article;
 import edu.stanford.nlp.simple.Document;
+import edu.stanford.nlp.simple.Sentence;
 import edu.stanford.nlp.ie.util.RelationTriple;
 
 
@@ -39,15 +41,17 @@ public class Application extends AppWorker{
 	
 	public static void main(String[] args) throws UnknownHostException {
 		
-		ArrayList<Article> bb_articles = AppWorker.getArticlesFromTopic("beef_ban");
-
-		generateTripleArticleStat(bb_articles.get(7));
+		Map<String, Article> bb_articles = getArticlesFromTopic("gay_marriage");
+		
+		Article article = bb_articles.get("article-uuid-865f80ac48b35e540cb770bcba74cf47c4715d8b");
+		
+		generateTripleArticleStat(article);
 		
 		//for(Article article : bb_articles){
 		//	generateTripleArticleStat(article);
 		//}
 		
-		System.out.println(AppWorker.extractConceptFromDBP("aggravated"));
+		System.out.println(extractConceptFromDBP("aggravated"));
 		
 		//System.out.println(ElasticController.getJSONTweetsFromIndex("beef_ban"));
 		//System.out.println(ElasticController.getJSONArticlesFromIndex("beef_ban"));

@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
 
@@ -24,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.stanford.nlp.ie.util.RelationTriple;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.simple.Document;
 import extractor.diff.DiffWorker;
 import extractor.elastic.controller.ElasticController;
@@ -59,6 +61,12 @@ public class AppWorker {
 		
 		List<RelationTriple> triples = article.getTriples();
 		
+		
+		Map<String, String> subject_only = new HashMap<String, String>();
+		Map<String, String> object_only = new HashMap<String, String>();
+		Map<String, String> both = new HashMap<String, String>();
+		
+		
 		//Converting to subjects and entities to concepts
 		
 		int matchingPair = 0;
@@ -69,13 +77,14 @@ public class AppWorker {
 		for(RelationTriple triple: triples) {
 			String subject = triple.subjectLemmaGloss();
 			String object = triple.objectLemmaGloss();
+			String relation = triple.relationLemmaGloss();
 			
 			boolean subjectAvailable = false;
 			boolean objectAvailable = false;
 			
 			//Subject parsing			
-			String subj_concept = AppWorker.extractConceptFromDBP(subject);
-			String obj_concept = AppWorker.extractConceptFromDBP(object);
+			String subj_concept = extractConceptFromDBP(subject);
+			String obj_concept = extractConceptFromDBP(object);
 			
 			if(subj_concept != null){
 				//Matching with the known entities means that this entity is legit.
@@ -90,15 +99,20 @@ public class AppWorker {
 					objectAvailable = true;
 				//}
 			}
+
 			
 			if(subjectAvailable && objectAvailable){
-				matchingPair++;
+				++matchingPair;
+				both.put(triple.asSentence().toString(), "(" + subject + "," + relation + "," + object + ")" + " Concepts: (" + subj_concept + "," + obj_concept + " )." );
+
 			}else if(subjectAvailable && !objectAvailable){
-				subonlyPair++;
+				subject_only.put(triple.asSentence().toString(), "(" + subject + "," + relation + "," + object + ")" + " Concept: " + subj_concept);
+				++subonlyPair;
 			}else if(!subjectAvailable && objectAvailable){
-				objonlyPair++;
+				++objonlyPair;
+				object_only.put(triple.asSentence().toString(), "(" + subject + "," + relation + "," + object + ")" + " Concept: " + obj_concept);
 			}else {
-				nonmatchingPair++;
+				++nonmatchingPair;
 			}
 
 		}
@@ -109,34 +123,60 @@ public class AppWorker {
 		System.out.println("Total # of triples whose subjects have concepts in DBpedia: " + subonlyPair);
 		System.out.println("Total # of triples whose objects have concepts in DBpedia: " + objonlyPair);
 		System.out.println("Total # of triples whose entities have no concepts in DBpedia: " + nonmatchingPair);
+		System.out.println("Subject Only Sentences and Triples");
+		for (Map.Entry<String, String> e : subject_only.entrySet()) {
+			System.out.println("Sentence: " + e.getKey() + " Triple: " + e.getValue());
+		}
+		
+		System.out.println("Object Only Sentences and Triples");
+		for (Map.Entry<String, String> e : object_only.entrySet()) {
+			System.out.println("Sentence: " + e.getKey() + " Triple: " + e.getValue());
+		}
+		
+		System.out.println("Subject and Object Sentences and Triples");
+		for (Map.Entry<String, String> e : both.entrySet()) {
+			System.out.println("Sentence: " + e.getKey() + " Triple: " + e.getValue());
+		}
 		
 		
 	}
 	
-	public static ArrayList<Article> getArticlesFromTopic(String topic){
+	public static Map<String, Article> getArticlesFromTopic(String topic){
 		
-		ArrayList<Article> articles = new ArrayList<Article>();
+		Map<String, Article> articles = new HashMap<String, Article>();
 		
 		SearchResponse response = ElasticController.getJSONArticlesFromIndex(topic);
-		
+
 		SearchHit[] results = response.getHits().getHits();
 		
 		for(SearchHit hit : results) {
-			
+			String article_id = hit.getId();
 			String source = hit.getSourceAsString();
 			try {
 				JSONObject sourceJSON = new JSONObject(source);
-				
+
 				//When creating an article, it will automatically populate the triple based on the description
-				Article article = new Article( (String) sourceJSON.get("title"), (String) sourceJSON.get("description"));
+				Article article = new Article( article_id, (String) sourceJSON.get("title"), (String) sourceJSON.get("description"));
+				
+				
 				
 				//Populating known entities properties of an article
 				ArrayList<String> known_entities = new ArrayList<String>();
-				JSONArray entities = sourceJSON.getJSONArray("entities");
-				for(int i = 0; i < entities.length(); i++) {
-					JSONObject obj = entities.getJSONObject(i);
-					String uri = obj.getString("uri");
-					known_entities.add(uri);
+				
+				
+				JSONArray entities = null;
+				try {
+					entities = sourceJSON.getJSONArray("entities");
+				}catch(Exception e){
+					
+				}	
+				
+				if(entities != null) {
+					for(int i = 0; i < entities.length(); i++) {
+						JSONObject obj = entities.getJSONObject(i);
+						String uri = obj.getString("uri");
+						known_entities.add(uri);
+					}		
 				}
 				
 				//Populating a timestamp of an article
@@ -146,7 +186,7 @@ public class AppWorker {
 				article.setKnownEntities(known_entities);
 
 				//Finally add the article to the list
-				articles.add(article);
+				articles.put(article_id, article);
 				
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
