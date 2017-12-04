@@ -31,6 +31,7 @@ import extractor.diff.DiffWorker;
 import extractor.elastic.controller.ElasticController;
 import extractor.models.Article;
 import extractor.models.Docu;
+import extractor.models.MMKGRelationTriple;
 import extractor.dbpedia.spotlight.client.DBpediaSpotlightClient;
 import extractor.dbpedia.spotlight.controller.DBpediaSpotlightController;
 import extractor.parser.CorefWorker;
@@ -59,12 +60,12 @@ public class AppWorker {
 	
 	public static void generateTripleArticleStat(Article article){
 		
-		List<RelationTriple> triples = article.getTriples();
+		List<MMKGRelationTriple> triples = article.getTriples();
 		
 		
-		Map<String, String> subject_only = new HashMap<String, String>();
-		Map<String, String> object_only = new HashMap<String, String>();
-		Map<String, String> both = new HashMap<String, String>();
+		Map<String, List<String>> subject_only = new HashMap<String, List<String>>();
+		Map<String, List<String>> object_only = new HashMap<String, List<String>>();
+		Map<String, List<String>> both = new HashMap<String, List<String>>();
 		
 		
 		//Converting to subjects and entities to concepts
@@ -74,10 +75,10 @@ public class AppWorker {
 		int objonlyPair = 0;
 		int nonmatchingPair = 0;
 		
-		for(RelationTriple triple: triples) {
-			String subject = triple.subjectLemmaGloss();
-			String object = triple.objectLemmaGloss();
-			String relation = triple.relationLemmaGloss();
+		for(MMKGRelationTriple triple: triples) {
+			String subject = triple.getTriple().subjectLemmaGloss();
+			String object = triple.getTriple().objectLemmaGloss();
+			String relation = triple.getTriple().relationLemmaGloss();
 			
 			boolean subjectAvailable = false;
 			boolean objectAvailable = false;
@@ -99,18 +100,48 @@ public class AppWorker {
 					objectAvailable = true;
 				//}
 			}
-
+			
 			
 			if(subjectAvailable && objectAvailable){
 				++matchingPair;
-				both.put(triple.asSentence().toString(), "(" + subject + "," + relation + "," + object + ")" + " Concepts: (" + subj_concept + "," + obj_concept + " )." );
-
+				String result = "(" + subject + "," + relation + "," + object + ")" + " Concepts: (" + subj_concept + "," + obj_concept + ")";
+				
+				if(both.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = both.get(triple.getSentenceToString());
+					curr_list.add(result);
+					both.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_List = new ArrayList<String>();
+					new_List.add(result);
+					both.put(triple.getSentenceToString(), new_List);
+				}
+				
 			}else if(subjectAvailable && !objectAvailable){
-				subject_only.put(triple.asSentence().toString(), "(" + subject + "," + relation + "," + object + ")" + " Concept: " + subj_concept);
+				
 				++subonlyPair;
+				String result = "(" + subject + "," + relation + "," + object + ")" + " Concepts: (" + subj_concept + "," + obj_concept + ")";
+				if(subject_only.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = subject_only.get(triple.getSentenceToString());
+					curr_list.add(result);
+					subject_only.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_List = new ArrayList<String>();
+					new_List.add(result);
+					subject_only.put(triple.getSentenceToString(), new_List);
+				}
+				
 			}else if(!subjectAvailable && objectAvailable){
 				++objonlyPair;
-				object_only.put(triple.asSentence().toString(), "(" + subject + "," + relation + "," + object + ")" + " Concept: " + obj_concept);
+				String result = "(" + subject + "," + relation + "," + object + ")" + " Concepts: (" + subj_concept + "," + obj_concept + ")";
+				if(object_only.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = object_only.get(triple.getSentenceToString());
+					curr_list.add(result);
+					object_only.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_List = new ArrayList<String>();
+					new_List.add(result);
+					object_only.put(triple.getSentenceToString(), new_List);
+				}
 			}else {
 				++nonmatchingPair;
 			}
@@ -118,27 +149,63 @@ public class AppWorker {
 		}
 		
 		System.out.println("Article Title: " + article.getTitle());
+		System.out.println();
+		
+		System.out.println("Article Content: " + article.getDescription());
+		System.out.println();
+		
 		System.out.println("Total # of triples: " + triples.size());
 		System.out.println("Total # of triples whose entities have concepts in DBpedia: " + matchingPair);
 		System.out.println("Total # of triples whose subjects have concepts in DBpedia: " + subonlyPair);
 		System.out.println("Total # of triples whose objects have concepts in DBpedia: " + objonlyPair);
 		System.out.println("Total # of triples whose entities have no concepts in DBpedia: " + nonmatchingPair);
+		System.out.println();
 		System.out.println("Subject Only Sentences and Triples");
-		for (Map.Entry<String, String> e : subject_only.entrySet()) {
-			System.out.println("Sentence: " + e.getKey() + " Triple: " + e.getValue());
+		System.out.println();
+		for (Map.Entry<String, List<String>> e : subject_only.entrySet()) {
+			System.out.println("Sentence: " + e.getKey());
+			List<String> tripleList = e.getValue();
+			int idx = 1;
+			for(String result: tripleList) {
+				System.out.println("\t Corresponding triple " + idx + ": " + result);
+				idx++;
+			}
+			System.out.println();
 		}
-		
+		System.out.println();
 		System.out.println("Object Only Sentences and Triples");
-		for (Map.Entry<String, String> e : object_only.entrySet()) {
-			System.out.println("Sentence: " + e.getKey() + " Triple: " + e.getValue());
+		System.out.println();
+		for (Map.Entry<String, List<String>> e : object_only.entrySet()) {
+			System.out.println("Sentence: " + e.getKey());
+			List<String> tripleList = e.getValue();
+			int idx = 1;
+			for(String result: tripleList) {
+				System.out.println("\t Corresponding triple " + idx + ": " + result);
+				idx++;
+			}
+			System.out.println();
 		}
-		
+		System.out.println();
 		System.out.println("Subject and Object Sentences and Triples");
-		for (Map.Entry<String, String> e : both.entrySet()) {
-			System.out.println("Sentence: " + e.getKey() + " Triple: " + e.getValue());
+		System.out.println();
+		for (Map.Entry<String, List<String>> e : both.entrySet()) {
+			System.out.println("Sentence: " + e.getKey());
+			List<String> tripleList = e.getValue();
+			int idx = 1;
+			for(String result: tripleList) {
+				System.out.println("\t Corresponding triple " + idx + ": " + result);
+				idx++;
+			}
+			System.out.println();
 		}
 		
 		
+	}
+	
+	public static String getSentence(List<CoreLabel> sentTokens){
+		List<String> words = new ArrayList<String>();
+		for(CoreLabel each : sentTokens) words.add(each.word());
+		return String.join(" ", words);
 	}
 	
 	public static Map<String, Article> getArticlesFromTopic(String topic){

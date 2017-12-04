@@ -7,7 +7,7 @@ import edu.stanford.nlp.ie.util.RelationTriple;
 
 public class Tweet implements IModel{
 
-	private List<RelationTriple> triples;
+	private List<MMKGRelationTriple> triples;
 	private List<String> subjects;
 	private List<String> objects;
 	private List<String> relations;
@@ -40,7 +40,7 @@ public class Tweet implements IModel{
 	}
 
 	@Override
-	public List<RelationTriple> getTriples() {
+	public List<MMKGRelationTriple> getTriples() {
 		// TODO Auto-generated method stub
 		return this.triples;
 	}

@@ -21,7 +21,7 @@ public class Article extends Docu implements IModel{
 	private String title;
 	private String description;
 	private List<Sentence> sentences;
-	private List<RelationTriple> triples;
+	private List<MMKGRelationTriple> triples;
 	private List<String> subjects;
 	private List<String> objects;
 	private List<String> relations;
@@ -38,11 +38,13 @@ public class Article extends Docu implements IModel{
 	public void populateTriples(){
 		Document document =  new Document(this.getDescription());
 		this.sentences = document.sentences();
-		triples = new ArrayList<RelationTriple>();
+		triples = new ArrayList<MMKGRelationTriple>();
 		
 	    for (Sentence sent : sentences) {
-		   for (RelationTriple triple : sent.openieTriples()) 
-			   triples.add(triple);
+		   for (RelationTriple triple : sent.openieTriples()) {
+			   MMKGRelationTriple mmkg_triple = new MMKGRelationTriple(triple, sent);
+			   triples.add(mmkg_triple);
+		   }
 	    }		
 	}
 	
@@ -54,7 +56,7 @@ public class Article extends Docu implements IModel{
 		return this.id;
 	}
 	
-	public List<RelationTriple> getTriples(){
+	public List<MMKGRelationTriple> getTriples(){
 		return this.triples;
 	}
 	
@@ -117,7 +119,7 @@ public class Article extends Docu implements IModel{
 	}
 	
 	public void printTriples(){
-	    for (RelationTriple triple : triples) {
+	    for (MMKGRelationTriple triple : triples) {
 		    System.out.println(triple.toString());
 	    }
 	}

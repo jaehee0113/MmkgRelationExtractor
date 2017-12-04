@@ -7,7 +7,7 @@ import edu.stanford.nlp.ie.util.RelationTriple;
 
 public interface IModel {
 	
-	public List<RelationTriple> getTriples();
+	public List<MMKGRelationTriple> getTriples();
 	
 	public List<String> getKnownEntities();
 	
