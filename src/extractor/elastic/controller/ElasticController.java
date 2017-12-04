@@ -15,6 +15,7 @@ import extractor.elastic.config.ElasticConfig;
 import extractor.elastic.lib.TopicDict;
 
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.unit.TimeValue;
 
 public class ElasticController {
 	
@@ -46,6 +47,7 @@ public class ElasticController {
 		String index = String.format("mmkg-doc-%s", topicDict.get(topic));	
 		
 		return ElasticClient.getInstance().prepareSearch(index)
+		.setScroll(new TimeValue(60000))
 		.setSize(ElasticConfig.PAGE_SIZE)
 		.setQuery(QueryBuilders.matchQuery("type", "tweet")).get();
 		
@@ -57,6 +59,7 @@ public class ElasticController {
 		String index = String.format("mmkg-doc-%s", topicDict.get(topic));	
 		
 		return ElasticClient.getInstance().prepareSearch(index)
+		.setScroll(new TimeValue(60000))
 		.setSize(ElasticConfig.PAGE_SIZE)
 		.setQuery(QueryBuilders.matchQuery("type", "article")).get();
 		
