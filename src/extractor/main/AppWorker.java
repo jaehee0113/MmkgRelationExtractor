@@ -37,6 +37,8 @@ import extractor.dbpedia.spotlight.controller.DBpediaSpotlightController;
 import extractor.parser.CorefWorker;
 import extractor.parser.SentenceWorker;
 import extractor.parser.TripleWorker;
+import extractor.semafor.client.SemaforClient;
+import extractor.semafor.controller.SemaforController;
 
 public class AppWorker {
 	
@@ -58,15 +60,33 @@ public class AppWorker {
 		return null;
 	}
 	
+	public static String extractRelationFrameFromSemafor(String relation, String text){
+		SemaforClient client = SemaforClient.getInstance();
+		SemaforController controller = new SemaforController(client);
+		
+		try {
+			String frame = controller.extractFrames(relation, text);			
+			return frame;
+		} catch (AnnotationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
 	public static void generateTripleArticleStat(Article article){
 		
 		List<MMKGRelationTriple> triples = article.getTriples();
 		
-		
 		Map<String, List<String>> subject_only = new HashMap<String, List<String>>();
 		Map<String, List<String>> object_only = new HashMap<String, List<String>>();
+		Map<String, List<String>> rel_frame_only = new HashMap<String, List<String>>();
+		Map<String, List<String>> rel_frame_subject_only = new HashMap<String, List<String>>();
+		Map<String, List<String>> rel_frame_object_only = new HashMap<String, List<String>>();
 		Map<String, List<String>> both = new HashMap<String, List<String>>();
 		Map<String, List<String>> none = new HashMap<String, List<String>>();
+		Map<String, List<String>> all = new HashMap<String, List<String>>();
 		
 		
 		//Converting to subjects and entities to concepts
@@ -74,15 +94,24 @@ public class AppWorker {
 		int matchingPair = 0;
 		int subonlyPair = 0;
 		int objonlyPair = 0;
+		int objonlyWithFramePair = 0;
+		int subonlyWithFramePair = 0;
 		int nonmatchingPair = 0;
+		int relFrameMatch = 0;
+		int allPair = 0;
+		int onlyRelFrame = 0;
 		
 		for(MMKGRelationTriple triple: triples) {
 			String subject = triple.getTriple().subjectLemmaGloss();
 			String object = triple.getTriple().objectLemmaGloss();
 			String relation = triple.getTriple().relationLemmaGloss();
+			String relation_ori = triple.getTriple().relationGloss();	
+			String relation_frame = extractRelationFrameFromSemafor(relation_ori, triple.getSentenceToString());
+			
 			
 			boolean subjectAvailable = false;
 			boolean objectAvailable = false;
+			boolean relFrameAvailable = false;
 			
 			//Subject parsing			
 			String subj_concept = extractConceptFromDBP(subject);
@@ -102,10 +131,19 @@ public class AppWorker {
 				//}
 			}
 			
+			String result = "(" + subject + "," + relation + "," + object + ")" + " Concepts: (" + subj_concept + "," + obj_concept + ")";
+
+			if(relation_frame != null) {
+				relFrameAvailable = true;
+				result = "(" + subject + "," + relation_frame + "," + object + ")" + " Concepts: (" + subj_concept + "," + obj_concept + ")";	
+			}
 			
-			if(subjectAvailable && objectAvailable){
+			if(relFrameAvailable) {
+				relFrameMatch++;
+			}
+			
+			if(!relFrameAvailable && subjectAvailable && objectAvailable){
 				++matchingPair;
-				String result = "(" + subject + "," + relation + "," + object + ")" + " Concepts: (" + subj_concept + "," + obj_concept + ")";
 				
 				if(both.containsKey(triple.getSentenceToString())){
 					List<String> curr_list = both.get(triple.getSentenceToString());
@@ -117,10 +155,9 @@ public class AppWorker {
 					both.put(triple.getSentenceToString(), new_list);
 				}
 				
-			}else if(subjectAvailable && !objectAvailable){
+			}else if(!relFrameAvailable && subjectAvailable && !objectAvailable){
 				
 				++subonlyPair;
-				String result = "(" + subject + "," + relation + "," + object + ")" + " Concepts: (" + subj_concept + "," + obj_concept + ")";
 				if(subject_only.containsKey(triple.getSentenceToString())){
 					List<String> curr_list = subject_only.get(triple.getSentenceToString());
 					curr_list.add(result);
@@ -131,9 +168,8 @@ public class AppWorker {
 					subject_only.put(triple.getSentenceToString(), new_list);
 				}
 				
-			}else if(!subjectAvailable && objectAvailable){
+			}else if(!relFrameAvailable && !subjectAvailable && objectAvailable){
 				++objonlyPair;
-				String result = "(" + subject + "," + relation + "," + object + ")" + " Concepts: (" + subj_concept + "," + obj_concept + ")";
 				if(object_only.containsKey(triple.getSentenceToString())){
 					List<String> curr_list = object_only.get(triple.getSentenceToString());
 					curr_list.add(result);
@@ -143,9 +179,8 @@ public class AppWorker {
 					new_list.add(result);
 					object_only.put(triple.getSentenceToString(), new_list);
 				}
-			}else {
+			}else if(!relFrameAvailable && !subjectAvailable && !objectAvailable) {
 				++nonmatchingPair;
-				String result = "(" + subject + "," + relation + "," + object + ")" + " Concepts: (" + subj_concept + "," + obj_concept + ")";
 				if(none.containsKey(triple.getSentenceToString())){
 					List<String> curr_list = none.get(triple.getSentenceToString());
 					curr_list.add(result);
@@ -156,7 +191,52 @@ public class AppWorker {
 					none.put(triple.getSentenceToString(), new_list);
 				}
 				
+			}else if(relFrameAvailable && !subjectAvailable && objectAvailable){
+				++subonlyWithFramePair;
+				if(rel_frame_subject_only.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = rel_frame_subject_only.get(triple.getSentenceToString());
+					curr_list.add(result);
+					rel_frame_subject_only.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					rel_frame_subject_only.put(triple.getSentenceToString(), new_list);
+				}
+			}else if(relFrameAvailable && subjectAvailable && !objectAvailable) {
+				++objonlyWithFramePair;
+				if(rel_frame_object_only.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = rel_frame_object_only.get(triple.getSentenceToString());
+					curr_list.add(result);
+					rel_frame_object_only.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					rel_frame_object_only.put(triple.getSentenceToString(), new_list);
+				}
+			}else if(subjectAvailable && objectAvailable && relFrameAvailable){
+				allPair++;
+				if(all.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = all.get(triple.getSentenceToString());
+					curr_list.add(result);
+					all.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					all.put(triple.getSentenceToString(), new_list);
+				}
+			}else if(!subjectAvailable && !objectAvailable && relFrameAvailable) {
+				onlyRelFrame++;
+				if(rel_frame_only.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = rel_frame_only.get(triple.getSentenceToString());
+					curr_list.add(result);
+					rel_frame_only.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					rel_frame_only.put(triple.getSentenceToString(), new_list);
+				}
 			}
+			
 
 		}
 		
@@ -167,10 +247,31 @@ public class AppWorker {
 		System.out.println();
 		
 		System.out.println("Total # of triples: " + triples.size());
+		
+		System.out.println("Total # of triples whose entities and relations have their canonical form: " + allPair);
 		System.out.println("Total # of triples whose entities have concepts in DBpedia: " + matchingPair);
 		System.out.println("Total # of triples whose subjects have concepts in DBpedia: " + subonlyPair);
+		System.out.println("Total # of triples whose subjects and relations have their canonical form: " + subonlyWithFramePair);
 		System.out.println("Total # of triples whose objects have concepts in DBpedia: " + objonlyPair);
+		System.out.println("Total # of triples whose objects and relations have their canonical form: " + objonlyWithFramePair);
 		System.out.println("Total # of triples whose entities have no concepts in DBpedia: " + nonmatchingPair);
+		System.out.println("Total # of triples whose relations have corresponding frame in FrameNet: " + relFrameMatch);
+		System.out.println("Total # of triples whose relations have frame and entities have no concepts: " + onlyRelFrame);
+		
+		System.out.println();
+		System.out.println("Entities and Relation Frame in Sentences and Triples");
+		System.out.println();
+		for (Map.Entry<String, List<String>> e : all.entrySet()) {
+			System.out.println("Sentence: " + e.getKey());
+			List<String> tripleList = e.getValue();
+			int idx = 1;
+			for(String result: tripleList) {
+				System.out.println("\t Corresponding triple " + idx + ": " + result);
+				idx++;
+			}
+			System.out.println();
+		}
+		
 		
 		System.out.println();
 		System.out.println("Subject and Object Sentences and Triples");
@@ -200,6 +301,21 @@ public class AppWorker {
 			}
 			System.out.println();
 		}
+		
+		System.out.println();
+		System.out.println("Subject Only Sentences and Triples with Relation Frame");
+		System.out.println();
+		for (Map.Entry<String, List<String>> e : rel_frame_subject_only.entrySet()) {
+			System.out.println("Sentence: " + e.getKey());
+			List<String> tripleList = e.getValue();
+			int idx = 1;
+			for(String result: tripleList) {
+				System.out.println("\t Corresponding triple " + idx + ": " + result);
+				idx++;
+			}
+			System.out.println();
+		}
+		
 		System.out.println();
 		System.out.println("Object Only Sentences and Triples");
 		System.out.println();
@@ -213,6 +329,35 @@ public class AppWorker {
 			}
 			System.out.println();
 		}
+		
+		System.out.println();
+		System.out.println("Object Only Sentences and Triples with Relation Frame");
+		System.out.println();
+		for (Map.Entry<String, List<String>> e : rel_frame_object_only.entrySet()) {
+			System.out.println("Sentence: " + e.getKey());
+			List<String> tripleList = e.getValue();
+			int idx = 1;
+			for(String result: tripleList) {
+				System.out.println("\t Corresponding triple " + idx + ": " + result);
+				idx++;
+			}
+			System.out.println();
+		}
+		
+		System.out.println();
+		System.out.println("No Entities Sentences and Triples with Relation Frame");
+		System.out.println();
+		for (Map.Entry<String, List<String>> e : rel_frame_only.entrySet()) {
+			System.out.println("Sentence: " + e.getKey());
+			List<String> tripleList = e.getValue();
+			int idx = 1;
+			for(String result: tripleList) {
+				System.out.println("\t Corresponding triple " + idx + ": " + result);
+				idx++;
+			}
+			System.out.println();
+		}
+		
 		System.out.println();
 		System.out.println("No Entities Sentences and Triples");
 		System.out.println();
@@ -226,6 +371,7 @@ public class AppWorker {
 			}
 			System.out.println();
 		}
+		
 		
 		
 	}
