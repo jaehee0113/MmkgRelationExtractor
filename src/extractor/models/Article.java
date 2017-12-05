@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import edu.stanford.nlp.ie.util.RelationTriple;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.simple.Document;
 import edu.stanford.nlp.simple.Sentence;
 
@@ -20,6 +21,7 @@ public class Article extends Docu implements IModel{
 	private String id;
 	private String title;
 	private String description;
+	private boolean strict;
 	private List<Sentence> sentences;
 	private List<MMKGRelationTriple> triples;
 	private List<String> subjects;
@@ -28,10 +30,11 @@ public class Article extends Docu implements IModel{
 	private List<String> known_entities;
 	private Date timestamp;
 	
-	public Article(String id, String title, String description){
+	public Article(String id, String title, String description, boolean strict){
 		this.id = id;
 		this.title = title;
 		this.description = description;
+		this.strict = strict;
 		populateTriples();
 	}
 	
@@ -41,9 +44,18 @@ public class Article extends Docu implements IModel{
 		triples = new ArrayList<MMKGRelationTriple>();
 		
 	    for (Sentence sent : sentences) {
-		   for (RelationTriple triple : sent.openieTriples()) {
-			   MMKGRelationTriple mmkg_triple = new MMKGRelationTriple(triple, sent);
-			   triples.add(mmkg_triple);
+		   for (RelationTriple triple : sent.openieTriples()) {			
+			   if(strict && triple.confidence == 1.0) {
+				   List<CoreLabel> canonicalSubjects = triple.canonicalSubject;
+				   List<CoreLabel> canonicalObjects = triple.canonicalObject;
+				   List<CoreLabel> relations = triple.relation;
+				   RelationTriple enhancedTriple = new RelationTriple(canonicalSubjects, relations, canonicalObjects, 1.0);
+				   MMKGRelationTriple mmkg_triple = new MMKGRelationTriple(enhancedTriple, sent);
+				   triples.add(mmkg_triple);				   
+			   }else if(!strict) {
+				   MMKGRelationTriple mmkg_triple = new MMKGRelationTriple(triple, sent);
+				   triples.add(mmkg_triple);				   
+			   }
 		   }
 	    }		
 	}
@@ -122,6 +134,10 @@ public class Article extends Docu implements IModel{
 	    for (MMKGRelationTriple triple : triples) {
 		    System.out.println(triple.toString());
 	    }
+	}
+	
+	public void setDescription(String description) {
+		this.description = description;
 	}
 	
 	public String toString(){
