@@ -66,6 +66,7 @@ public class AppWorker {
 		Map<String, List<String>> subject_only = new HashMap<String, List<String>>();
 		Map<String, List<String>> object_only = new HashMap<String, List<String>>();
 		Map<String, List<String>> both = new HashMap<String, List<String>>();
+		Map<String, List<String>> none = new HashMap<String, List<String>>();
 		
 		
 		//Converting to subjects and entities to concepts
@@ -111,9 +112,9 @@ public class AppWorker {
 					curr_list.add(result);
 					both.put(triple.getSentenceToString(), curr_list);
 				}else {
-					List<String> new_List = new ArrayList<String>();
-					new_List.add(result);
-					both.put(triple.getSentenceToString(), new_List);
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					both.put(triple.getSentenceToString(), new_list);
 				}
 				
 			}else if(subjectAvailable && !objectAvailable){
@@ -125,9 +126,9 @@ public class AppWorker {
 					curr_list.add(result);
 					subject_only.put(triple.getSentenceToString(), curr_list);
 				}else {
-					List<String> new_List = new ArrayList<String>();
-					new_List.add(result);
-					subject_only.put(triple.getSentenceToString(), new_List);
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					subject_only.put(triple.getSentenceToString(), new_list);
 				}
 				
 			}else if(!subjectAvailable && objectAvailable){
@@ -138,12 +139,23 @@ public class AppWorker {
 					curr_list.add(result);
 					object_only.put(triple.getSentenceToString(), curr_list);
 				}else {
-					List<String> new_List = new ArrayList<String>();
-					new_List.add(result);
-					object_only.put(triple.getSentenceToString(), new_List);
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					object_only.put(triple.getSentenceToString(), new_list);
 				}
 			}else {
 				++nonmatchingPair;
+				String result = "(" + subject + "," + relation + "," + object + ")" + " Concepts: (" + subj_concept + "," + obj_concept + ")";
+				if(none.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = none.get(triple.getSentenceToString());
+					curr_list.add(result);
+					none.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					none.put(triple.getSentenceToString(), new_list);
+				}
+				
 			}
 
 		}
@@ -159,6 +171,22 @@ public class AppWorker {
 		System.out.println("Total # of triples whose subjects have concepts in DBpedia: " + subonlyPair);
 		System.out.println("Total # of triples whose objects have concepts in DBpedia: " + objonlyPair);
 		System.out.println("Total # of triples whose entities have no concepts in DBpedia: " + nonmatchingPair);
+		
+		System.out.println();
+		System.out.println("Subject and Object Sentences and Triples");
+		System.out.println();
+		for (Map.Entry<String, List<String>> e : both.entrySet()) {
+			System.out.println("Sentence: " + e.getKey());
+			List<String> tripleList = e.getValue();
+			int idx = 1;
+			for(String result: tripleList) {
+				System.out.println("\t Corresponding triple " + idx + ": " + result);
+				idx++;
+			}
+			System.out.println();
+		}
+		
+		
 		System.out.println();
 		System.out.println("Subject Only Sentences and Triples");
 		System.out.println();
@@ -186,9 +214,9 @@ public class AppWorker {
 			System.out.println();
 		}
 		System.out.println();
-		System.out.println("Subject and Object Sentences and Triples");
+		System.out.println("No Entities Sentences and Triples");
 		System.out.println();
-		for (Map.Entry<String, List<String>> e : both.entrySet()) {
+		for (Map.Entry<String, List<String>> e : none.entrySet()) {
 			System.out.println("Sentence: " + e.getKey());
 			List<String> tripleList = e.getValue();
 			int idx = 1;
@@ -221,11 +249,10 @@ public class AppWorker {
 			String source = hit.getSourceAsString();
 			try {
 				JSONObject sourceJSON = new JSONObject(source);
-
-				//When creating an article, it will automatically populate the triple based on the description
-				Article article = new Article( article_id, (String) sourceJSON.get("title"), (String) sourceJSON.get("description"));
 				
+				String description = (String) sourceJSON.get("description");
 				
+				Article article = new Article( article_id, (String) sourceJSON.get("title"), description, true);
 				
 				//Populating known entities properties of an article
 				ArrayList<String> known_entities = new ArrayList<String>();
