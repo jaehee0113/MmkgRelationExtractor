@@ -145,12 +145,12 @@ public class AppWorker {
 			if(subj_concept != null) subjectAvailable = true;
 			if(obj_concept != null) objectAvailable = true;
 			
-			String result = "(" + subject + "," + relation + "," + object + ")" + " Concepts: (" + subj_concept + "," + obj_concept + ")";
+			String result = "(" + subject + "," + relation + "," + object + ")" + " Canonical form: (" + subj_concept + "," + obj_concept + ")";
 
 			if(relation_frame != null) {
 				relFrameAvailable = true;
 				relFrameMatch++;
-				result = "(" + subject + "," + relation_frame + "," + object + ")" + " Concepts: (" + subj_concept + "," + obj_concept + ")";	
+				result = "(" + subject + "," + relation + "," + object + ")" + " Canonical form: (" + subj_concept + "," + relation_frame + "," + obj_concept + ")";	
 			}
 			
 			if(!relFrameAvailable && subjectAvailable && objectAvailable){
@@ -261,7 +261,7 @@ public class AppWorker {
 		System.out.println("Total # of triples: " + triples.size());
 		
 		System.out.println("Total # of triples whose entities and relations have their canonical form: " + allPair);
-		System.out.println("Total # of triples whose entities have concepts in DBpedia: " + matchingPair);
+		System.out.println("Total # of triples whose entities have concepts and relations have no frames: " + matchingPair);
 		System.out.println("Total # of triples whose subjects have concepts in DBpedia: " + subonlyPair);
 		System.out.println("Total # of triples whose subjects and relations have their canonical form: " + subonlyWithFramePair);
 		System.out.println("Total # of triples whose objects have concepts in DBpedia: " + objonlyPair);

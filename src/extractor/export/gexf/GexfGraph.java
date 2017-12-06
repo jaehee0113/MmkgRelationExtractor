@@ -63,7 +63,6 @@ public class GexfGraph {
 			/*
 			 * Node id: concept (if null, just null) + ent_type (subj, obj) + gloss
 			 * Edge id: frame (if null, just null) + gloss
-			 * 
 			 */
 			
 			String sID = "";
@@ -108,6 +107,8 @@ public class GexfGraph {
 				relation.setLabel(original_triple.relationGloss());
 				if(triple.getRelationFrame() != null)
 					relation.getAttributeValues().addValue(attEdgeUrl, triple.getRelationFrame());
+			}else{
+				System.out.println("(" + original_triple.subjectGloss() + "," + original_triple.relationGloss() + "," + original_triple.objectGloss() + ") has been ignored due to duplicates.");
 			}
 			
 		}
