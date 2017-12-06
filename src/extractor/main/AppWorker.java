@@ -115,6 +115,9 @@ public class AppWorker {
 		Map<String, List<String>> none = new HashMap<String, List<String>>();
 		Map<String, List<String>> all = new HashMap<String, List<String>>();
 		
+		//Triples in canonical form
+		List<MMKGRelationTriple> canonicalTriples = new ArrayList<MMKGRelationTriple>();
+		
 		//Generate Report
 		
 		int matchingPair = 0;
@@ -223,6 +226,7 @@ public class AppWorker {
 				}
 			}else if(subjectAvailable && objectAvailable && relFrameAvailable){
 				allPair++;
+				canonicalTriples.add(triple);
 				if(all.containsKey(triple.getSentenceToString())){
 					List<String> curr_list = all.get(triple.getSentenceToString());
 					curr_list.add(result);
@@ -310,7 +314,11 @@ public class AppWorker {
 		// Generate gexf file for graph rendering
 		GexfGraph graph = new GexfGraph();
 		graph.createGraphFromTriples(triples);
-		graph.exportGexfGraph("sample");
+		graph.exportGexfGraph("uncanonized");
+		
+		GexfGraph graph1 = new GexfGraph();
+		graph1.createGraphFromTriples(canonicalTriples);
+		graph1.exportGexfGraph("canonized");
 		
 	}
 	
