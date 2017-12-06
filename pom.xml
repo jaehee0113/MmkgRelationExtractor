@@ -71,5 +71,10 @@
   			  <scope>system</scope>
   			  <systemPath>${project.basedir}/src/main/resources/dbpedia-spotlight-1.0.0.jar</systemPath>
 		 </dependency>
+		 <dependency>
+		 	  <groupId>it.uniroma1.dis.wsngroup.gexf4j</groupId>
+  			  <artifactId>gexf4j</artifactId>
+  			  <version>1.0.0</version>
+		 </dependency>
   </dependencies>
 </project>
