@@ -1,19 +1,22 @@
 package extractor.models;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import edu.stanford.nlp.ie.util.RelationTriple;
+import edu.stanford.nlp.simple.Sentence;
 
 public class Tweet implements IModel{
-
-	private List<MMKGRelationTriple> triples;
+	
+	private String id;
+	private List<MMKGRelationTriple> triples;	
+	private List<Sentence> sentences;
 	private List<String> subjects;
 	private List<String> objects;
 	private List<String> relations;
-	
 	private List<String> known_entities;
-
+	private Date timestamp;
 
 	@Override
 	public List<String> getSubjects() {
@@ -43,6 +46,36 @@ public class Tweet implements IModel{
 	public List<MMKGRelationTriple> getTriples() {
 		// TODO Auto-generated method stub
 		return this.triples;
+	}
+
+	@Override
+	public String getTitle() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getDescription() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Date getTimestamp() {
+		// TODO Auto-generated method stub
+		return this.timestamp;
+	}
+
+	@Override
+	public List<Sentence> getSentences() {
+		// TODO Auto-generated method stub
+		return this.sentences;
+	}
+
+	@Override
+	public String getDocumentID() {
+		// TODO Auto-generated method stub
+		return this.id;
 	}
 
 }

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import extractor.dbpedia.spotlight.client.DBpediaLookupClient;
 import extractor.models.Article;
 
 public class Application extends AppWorker{
@@ -14,6 +16,7 @@ public class Application extends AppWorker{
 	static HashMap<String, ArrayList<String>> subjectSimilarDBPEntities;
 	
 	public static void main(String[] args) throws UnknownHostException {
+		
 		Map<String, Article> bb_articles = getArticlesFromTopic("gay_marriage");
 		
 		//Gets specific article from the topic using its id

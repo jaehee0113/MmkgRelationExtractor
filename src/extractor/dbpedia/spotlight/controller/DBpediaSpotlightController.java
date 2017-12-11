@@ -83,6 +83,7 @@ public class DBpediaSpotlightController extends AnnotationClient{
 				details.put("URI", entity.getString("@URI"));
 				details.put("support", entity.getString("@support"));
 				details.put("similarity", entity.getString("@similarityScore"));
+				details.put("surface", entity.getString("@surfaceForm"));
 				resources.put(entity.getString("@surfaceForm"), details);
 				
 			} catch (JSONException e) {

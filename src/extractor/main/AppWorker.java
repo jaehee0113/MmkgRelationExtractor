@@ -33,6 +33,7 @@ import extractor.export.gexf.GexfGraph;
 import extractor.models.Article;
 import extractor.models.Docu;
 import extractor.models.MMKGRelationTriple;
+import extractor.dbpedia.spotlight.client.DBpediaLookupClient;
 import extractor.dbpedia.spotlight.client.DBpediaSpotlightClient;
 import extractor.dbpedia.spotlight.controller.DBpediaSpotlightController;
 import extractor.parser.CorefWorker;
@@ -43,15 +44,38 @@ import extractor.semafor.controller.SemaforController;
 
 public class AppWorker {
 	
-	public static String extractConceptFromDBP(String text){
+	public static String extractConceptFromDBPLookup(String text){
+		DBpediaLookupClient controller;
+		try {
+			controller = new DBpediaLookupClient(text);
+			Map<String, String> result = controller.getResult();
+			String the_result = result.get("URI");
+			
+			if(the_result == null)return null;
+			else return the_result;
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	public static String extractConceptFromDBP(String entity, String text){
 		DBpediaSpotlightClient client = DBpediaSpotlightClient.getInstance();
 		DBpediaSpotlightController controller = new DBpediaSpotlightController(client);
 		try {
-			Map<String, HashMap<String, String>> result = controller.extractFromString(text);
-			HashMap<String, String> the_result = result.get(text);
 			
-			if(the_result == null)return null;
-			else return the_result.get("URI");
+			Map<String, HashMap<String, String>> result = controller.extractFromString(text);
+			
+			if(result == null) return null;
+			
+			for (Map.Entry<String, HashMap<String, String>> e : result.entrySet()) {
+				if(entity.contains(e.getKey())) {
+					Map<String, String> sub_result = e.getValue();
+					return sub_result.get("URI");
+				}	
+			}
 			
 		} catch (AnnotationException e) {
 			// TODO Auto-generated catch block
@@ -84,11 +108,9 @@ public class AppWorker {
 			String subject = triple.getTriple().subjectLemmaGloss();
 			String object = triple.getTriple().objectLemmaGloss();
 			String relation = triple.getTriple().relationGloss();
-			
-			//Extracting canonical form of a triple
-			
-			String subject_concept = extractConceptFromDBP(subject);
-			String object_concept = extractConceptFromDBP(object);
+						
+			String subject_concept = extractConceptFromDBP(subject, triple.getSentenceToString());
+			String object_concept = extractConceptFromDBP(object, triple.getSentenceToString());
 			String relation_frame = extractRelationFrameFromSemafor(relation, triple.getSentenceToString());
 			
 			//Store in MMKGRelationTriple object
