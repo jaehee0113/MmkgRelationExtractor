@@ -1,12 +1,9 @@
 package extractor.elastic.controller;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.QueryBuilders.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,7 +11,6 @@ import extractor.elastic.client.ElasticClient;
 import extractor.elastic.config.ElasticConfig;
 import extractor.elastic.lib.TopicDict;
 
-import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.unit.TimeValue;
 
 public class ElasticController {

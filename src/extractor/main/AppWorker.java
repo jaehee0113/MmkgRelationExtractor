@@ -1,37 +1,33 @@
 package extractor.main;
 
-import java.io.File;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
 
 import javax.xml.bind.DatatypeConverter;
 
 import org.dbpedia.spotlight.exceptions.AnnotationException;
-import org.dbpedia.spotlight.model.DBpediaResource;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.stanford.nlp.ie.util.RelationTriple;
+
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.simple.Document;
 import extractor.diff.DiffWorker;
 import extractor.elastic.controller.ElasticController;
 import extractor.export.gexf.GexfGraph;
 import extractor.models.Article;
-import extractor.models.Docu;
 import extractor.models.MMKGRelationTriple;
 import extractor.dbpedia.spotlight.client.DBpediaLookupClient;
 import extractor.dbpedia.spotlight.client.DBpediaSpotlightClient;
@@ -40,6 +36,7 @@ import extractor.parser.CorefWorker;
 import extractor.parser.SentenceWorker;
 import extractor.parser.TripleWorker;
 import extractor.semafor.client.SemaforClient;
+import extractor.semafor.config.SemaforConfig;
 import extractor.semafor.controller.SemaforController;
 
 public class AppWorker {
@@ -68,21 +65,109 @@ public class AppWorker {
 			
 			Map<String, HashMap<String, String>> result = controller.extractFromString(text);
 			
-			if(result == null) return null;
 			
-			for (Map.Entry<String, HashMap<String, String>> e : result.entrySet()) {
-				if(entity.contains(e.getKey())) {
-					Map<String, String> sub_result = e.getValue();
-					return sub_result.get("URI");
-				}	
-			}
+			Map<String, HashMap<String, String>> ent_result = controller.extractFromString(entity);
+			HashMap<String, String> the_ent_result = ent_result.get(entity);
+			
+			//if cannot be found from string do another matching just by putting in subject or object
+
+			if(the_ent_result == null) {
+				for (Map.Entry<String, HashMap<String, String>> e : result.entrySet()) {
+					if(entity.contains(e.getKey())) {
+						Map<String, String> sub_result = e.getValue();
+						return sub_result.get("URI");
+					}	
+				}
+			}else return the_ent_result.get("URI");	
 			
 		} catch (AnnotationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+		//If still not getting any result, try DBpedia lookup
+		String final_result = extractConceptFromDBPLookup(entity);
+		if(final_result != null) {
+			return final_result;
+		}
+		
 		return null;
+	}
+	
+	public static Map<String, String> getFrames(Article article) throws InterruptedException, JSONException{
+		List<MMKGRelationTriple> triples = article.getTriples();
+		Map<String, String> relation_frame = new HashMap<String,String>();
+		Runtime rt = Runtime.getRuntime();
+		
+		try {
+			
+			Process pr = rt.exec( SemaforConfig.MALT_PARSER_SHELL_DIR + " " + SemaforConfig.INPUT_FILE_DIR + article.getDocumentID() + ".txt" + " " + SemaforConfig.OUTPUT_DIR);
+			BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			 
+            String line=null;
+
+            while((line=input.readLine()) != null) {
+                System.out.println(line);
+            }
+
+            int exitVal = pr.waitFor();
+            System.out.println("Exited with error code " + exitVal);
+            
+            if(exitVal == 1) {
+            	
+	            BufferedReader errinput = new BufferedReader(new InputStreamReader(
+	            		pr.getErrorStream()));
+	            String line2 =null;
+	
+	            while((line2 = errinput.readLine()) != null) {
+	                System.out.println(line2);
+	            }
+            
+            }
+            
+            if(exitVal == 0) {
+    			String[] cmd2 = {
+    					"/bin/sh",
+    					"-c",
+    					"cat /home/admin-u4722839/Desktop/semafor/output/conll | nc localhost 8888"
+    			};
+    			
+    			
+    			pr = rt.exec(cmd2);
+                BufferedReader input2 = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+                String line2 =null;
+                
+                int sent_idx = 0;
+                while((line2 = input2.readLine()) != null) {
+                	
+                	MMKGRelationTriple triple = triples.get(sent_idx);
+                	String relation = triple.getTriple().relationGloss();
+                	
+                	JSONObject result = new JSONObject(line2);
+                	JSONArray frames = result.getJSONArray("frames");
+                	
+    				for(int j = 0; j < frames.length(); j++){
+    					JSONObject frame = frames.getJSONObject(j);
+    					JSONArray spans = frame.getJSONObject("target").getJSONArray("spans");
+    					JSONObject text_object = spans.getJSONObject(0);
+    					String text = text_object.getString("text");
+    					String name = frame.getJSONObject("target").getString("name");
+    					if(relation.contains(text)) {
+    						relation_frame.put(relation, name);
+    					}
+    				}
+    
+    				++sent_idx;
+                }
+                
+            }
+		
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return relation_frame;
 	}
 	
 	public static String extractRelationFrameFromSemafor(String relation, String text){
@@ -100,7 +185,9 @@ public class AppWorker {
 		return null;
 	}
 	
-	public static void extractCanonicalForm(Article article){
+	public static void extractCanonicalForm(Article article) throws InterruptedException, JSONException{
+		
+		Map<String,String> relation_frames = getFrames(article);
 		
 		List<MMKGRelationTriple> triples = article.getTriples();
 		for(MMKGRelationTriple triple: triples) {
@@ -111,7 +198,7 @@ public class AppWorker {
 						
 			String subject_concept = extractConceptFromDBP(subject, triple.getSentenceToString());
 			String object_concept = extractConceptFromDBP(object, triple.getSentenceToString());
-			String relation_frame = extractRelationFrameFromSemafor(relation, triple.getSentenceToString());
+			String relation_frame = relation_frames.get(relation);
 			
 			//Store in MMKGRelationTriple object
 			triple.setRelationFrame(relation_frame);
@@ -120,7 +207,7 @@ public class AppWorker {
 		}
 	}
 	
-	public static void generateTripleArticleStat(Article article){
+	public static void generateTripleArticleStat(Article article) throws InterruptedException, JSONException{
 		
 		//First extract canonical form
 		extractCanonicalForm(article);

@@ -3,20 +3,63 @@ package extractor.lib;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+
+import extractor.models.Article;
+import extractor.models.MMKGRelationTriple;
 
 
 public class FileProcessor {
 	
     protected static String readFileAsString(File file) throws IOException {
         byte[] buffer = new byte[(int) file.length()];
-        BufferedInputStream f = new BufferedInputStream(new FileInputStream(file));
+        @SuppressWarnings("resource")
+		BufferedInputStream f = new BufferedInputStream(new FileInputStream(file));
         f.read(buffer);
         return new String(buffer);
+    }
+    
+    public static List<String> getSentencesFromArticle(Article article){
+    	
+    	List<String> sentences = new ArrayList<String>();
+    	List<MMKGRelationTriple> triples = article.getTriples();
+    	
+    	for(MMKGRelationTriple triple: triples){
+    		sentences.add(triple.getSentenceToString());
+    	}
+    	
+    	return sentences;
+    	
+    }
+    
+    //used for generating text file of sentences of an article
+    public static void writeFile(List<String> sentences, String out_file_name){
+    	    	
+    	try {
+			PrintWriter writer = new PrintWriter(out_file_name + ".txt", "UTF-8");
+			
+			for(String sent: sentences){
+				writer.println(sent);
+			}
+			
+			writer.close();
+			System.out.println("File has successfully been generated.");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
     }
     
     public static void printUniqueEntities(Set<String> entities) {

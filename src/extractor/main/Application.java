@@ -3,10 +3,13 @@ package extractor.main;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import extractor.dbpedia.spotlight.client.DBpediaLookupClient;
+import org.json.JSONException;
+
+import extractor.lib.FileProcessor;
 import extractor.models.Article;
 
 public class Application extends AppWorker{
@@ -15,7 +18,7 @@ public class Application extends AppWorker{
 	static Set<String> dbpediaEntities;
 	static HashMap<String, ArrayList<String>> subjectSimilarDBPEntities;
 	
-	public static void main(String[] args) throws UnknownHostException {
+	public static void main(String[] args) throws UnknownHostException, InterruptedException, JSONException {
 		
 		Map<String, Article> bb_articles = getArticlesFromTopic("gay_marriage");
 		
@@ -30,7 +33,12 @@ public class Application extends AppWorker{
 		}
 		article.populateTriples();
 		
+		//Generates the file of sentence list
+		List<String> sentences = FileProcessor.getSentencesFromArticle(article);
+		FileProcessor.writeFile(sentences, article.getDocumentID());
+				
 		//Generates statistics about an article
 		generateTripleArticleStat(article);
+
 	}
 }
