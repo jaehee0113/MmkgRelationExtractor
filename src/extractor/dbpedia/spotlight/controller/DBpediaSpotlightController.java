@@ -132,7 +132,7 @@ public class DBpediaSpotlightController extends AnnotationClient{
 		String spotlightResponse;
 		
 		try {
-			GetMethod getMethod = new GetMethod(DBpediaSpotlightConfig.API_URL + "/en/annotate/?" +
+			GetMethod getMethod = new GetMethod(DBpediaSpotlightConfig.API_URL + "/annotate/?" +
 					"confidence=" + DBpediaSpotlightConfig.CONFIDENCE
 					+ "&support=" + DBpediaSpotlightConfig.SUPPORT
 					+ "&text=" + URLEncoder.encode(text, "utf-8"));
