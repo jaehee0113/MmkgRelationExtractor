@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import edu.stanford.nlp.ie.util.RelationTriple;
@@ -45,16 +48,30 @@ public class GexfGraph {
 	}
 	
 	//Map<Sentence, corresponding triple [order: subject, relation, triple>
-	public void createGraphFromTriples(List<MMKGRelationTriple> triples){
+	public void createGraphFromTriples(Date timestamp, List<MMKGRelationTriple> triples){
+		
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(timestamp);
+		
+		String modified_date = new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime());
+		
+		
 		AttributeList attrEdgeList = new AttributeListImpl(AttributeClass.EDGE);
 		AttributeList attrList = new AttributeListImpl(AttributeClass.NODE);
 		
 		graph.getAttributeLists().add(attrList);
+		//URL of the DBpedia concept link
 		Attribute attUrl = attrList.createAttribute(AttributeType.STRING, "url");
+		
+		//Subject or Object
 		Attribute entType = attrList.createAttribute(AttributeType.STRING, "entity_type");
+		
+		//Concept (e.g. Person)
+		Attribute type = attrList.createAttribute(AttributeType.LONG, "type");
 		
 		graph.getAttributeLists().add(attrEdgeList);
 		Attribute attEdgeUrl = attrEdgeList.createAttribute(AttributeType.STRING, "url");
+		Attribute time = attrEdgeList.createAttribute(AttributeType.STRING, "time");
 		
 		for (MMKGRelationTriple triple : triples) {
 			
@@ -64,7 +81,6 @@ public class GexfGraph {
 			 * Node id: concept (if null, just null) + ent_type (subj, obj) + gloss
 			 * Edge id: frame (if null, just null) + gloss
 			 */
-			
 			String sID = "";
 			String oID = "";
 			String rID = "";
@@ -86,6 +102,11 @@ public class GexfGraph {
 				Node subject = graph.createNode(sID);
 				subject.setLabel(original_triple.subjectGloss());
 				subject.getAttributeValues().addValue(entType, "subject");
+				
+				if(triple.getSubjectConceptType() != null)
+					subject.getAttributeValues().addValue(type, triple.getSubjectConceptType());
+
+				
 				if(triple.getSubjectConcept() != null)
 					subject.getAttributeValues().addValue(attUrl, triple.getSubjectConcept());
 			}
@@ -96,6 +117,10 @@ public class GexfGraph {
 				Node object = graph.createNode(oID);
 				object.setLabel(original_triple.objectGloss());
 				object.getAttributeValues().addValue(entType, "object");
+				
+				if(triple.getObjectConceptType() != null)
+					object.getAttributeValues().addValue(type, triple.getObjectConceptType());
+				
 				if(triple.getObjectConcept() != null)
 					object.getAttributeValues().addValue(attUrl, triple.getObjectConcept());	
 			}
@@ -104,9 +129,12 @@ public class GexfGraph {
 			
 			if(getEdge(rID) == null && !subject.hasEdgeTo(oID)){
 				Edge relation = subject.connectTo(rID, object);
+				relation.setWeight(1);
 				relation.setLabel(original_triple.relationGloss());
 				if(triple.getRelationFrame() != null)
 					relation.getAttributeValues().addValue(attEdgeUrl, triple.getRelationFrame());
+				
+				relation.getAttributeValues().addValue(time, modified_date);
 			}else{
 				System.out.println("(" + original_triple.subjectGloss() + "," + original_triple.relationGloss() + "," + original_triple.objectGloss() + ") has been ignored due to duplicates.");
 			}
