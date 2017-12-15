@@ -183,7 +183,7 @@ function refreshViewGraph(start, end) {
             d.color = "#eee"
         }
     });
-    // console.log(viewgraph);
+    //console.log(viewgraph);
     update();
 }
 
@@ -203,15 +203,15 @@ function update() {
       .data(viewgraph.links);
   link.enter().append("line")
       .attr("class", "link")
-      .style("stroke-width", function (d) { return 3*Math.sqrt(d.value/edgelength); });
+      .style("stroke-width", function (d) { return 10*Math.sqrt(d.value/edgelength); });
   link.exit().remove();
-  link.style("stroke", function (d) { return d.color; });
+  link.style("stroke", function (d) { return color(d.url); });
 
   var node = svg.selectAll(".node")
       .data(viewgraph.nodes);
   node.enter().append("circle")
       .attr("class", "node")
-      .attr("r", function(d) { return 10*d.degree/mean_degree; })
+      .attr("r", function(d) { return 25; })
       .attr("fill", function(d) { if (d.group == 0) return "#FF0000"; else return color(d.group); })
       .call(cola.drag);
 
@@ -219,13 +219,24 @@ function update() {
       .data(viewgraph.nodes);
   label.enter().append("text")
       .attr("class", "label")
-      .text(function (d) { return d.name; })
+      .style("font-size", "18px")
+      .text(function (d) { return d.label; })
+      .call(cola.drag);
+
+  var eLabel = svg.selectAll(".elabel")
+      .data(viewgraph.links);
+      eLabel.enter().append("text")
+      .attr("class", "elabel")
+      .style("font-size", "12px")
+      .text(function (d) { return d.label; })
       .call(cola.drag);
 
   node.append("title")
       .text(function(d) { return d.groupname; });
   label.append("title")
       .text(function(d) { return d.groupname; });
+  eLabel.append("title")
+      .text(function(d) { return d.url; });
 
   cola.on("tick", function () {
       link.attr("x1", function (d) { return d.source.x; })
@@ -242,6 +253,18 @@ function update() {
            .attr("y", function (d) {
               var h = this.getBBox().height;
               return d.y + h/4;
+            });
+      eLabel.attr("x", function (d) {
+            if (d.target.x > d.source.x) {
+                return (d.source.x + (d.target.x - d.source.x)/2); }
+            else {
+                return (d.target.x + (d.source.x - d.target.x)/2); }
+            })
+           .attr("y", function (d) {
+            if (d.target.y > d.source.y) {
+              return (d.source.y + (d.target.y - d.source.y)/2); }
+            else {
+              return (d.target.y + (d.source.y - d.target.y)/2); }
             });
   });
 }

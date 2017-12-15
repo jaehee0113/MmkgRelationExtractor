@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ import extractor.models.Article;
 import extractor.models.MMKGRelationTriple;
 import extractor.dbpedia.spotlight.client.DBpediaLookupClient;
 import extractor.dbpedia.spotlight.client.DBpediaSpotlightClient;
+import extractor.dbpedia.spotlight.config.DBpediaSpotlightConfig;
 import extractor.dbpedia.spotlight.controller.DBpediaSpotlightController;
 import extractor.parser.CorefWorker;
 import extractor.parser.SentenceWorker;
@@ -58,7 +60,10 @@ public class AppWorker {
 		return null;
 	}
 	
-	public static String extractConceptFromDBP(String entity, String text){
+	public static List<String> extractConceptFromDBP(String entity, String text){
+		
+		List<String> return_obj = new ArrayList<String>();
+		
 		DBpediaSpotlightClient client = DBpediaSpotlightClient.getInstance();
 		DBpediaSpotlightController controller = new DBpediaSpotlightController(client);
 		try {
@@ -75,10 +80,18 @@ public class AppWorker {
 				for (Map.Entry<String, HashMap<String, String>> e : result.entrySet()) {
 					if(entity.contains(e.getKey())) {
 						Map<String, String> sub_result = e.getValue();
-						return sub_result.get("URI");
+						return_obj.add(sub_result.get("URI"));
+						return_obj.add(sub_result.get("types"));
+						return return_obj;
 					}	
 				}
-			}else return the_ent_result.get("URI");	
+			}else {
+				
+				return_obj.add(the_ent_result.get("URI"));
+				return_obj.add(the_ent_result.get("types"));
+				
+				return return_obj;	
+			} 
 			
 		} catch (AnnotationException e) {
 			// TODO Auto-generated catch block
@@ -86,10 +99,10 @@ public class AppWorker {
 		}
 		
 		//If still not getting any result, try DBpedia lookup
-		String final_result = extractConceptFromDBPLookup(entity);
-		if(final_result != null) {
-			return final_result;
-		}
+		//String final_result = extractConceptFromDBPLookup(entity);
+		//if(final_result != null) {
+		//	return final_result;
+		//}
 		
 		return null;
 	}
@@ -195,16 +208,53 @@ public class AppWorker {
 			String subject = triple.getTriple().subjectLemmaGloss();
 			String object = triple.getTriple().objectLemmaGloss();
 			String relation = triple.getTriple().relationGloss();
+			
+			List<String> subject_concept_details = extractConceptFromDBP(subject, triple.getSentenceToString());
+			List<String> object_concept_details = extractConceptFromDBP(object, triple.getSentenceToString());
 						
-			String subject_concept = extractConceptFromDBP(subject, triple.getSentenceToString());
-			String object_concept = extractConceptFromDBP(object, triple.getSentenceToString());
+			if(subject_concept_details != null){
+				String subject_concept = subject_concept_details.get(0);
+				String subject_concept_types = subject_concept_details.get(1);	
+				
+				
+				List<String> subject_concept_types_list = new ArrayList<String>(Arrays.asList(subject_concept_types.split(",")));
+				String subject_concept_type = getConceptType(subject_concept_types_list);
+				
+				triple.setSubjectConcept(subject_concept);
+				triple.setSubjectConceptType(subject_concept_type);
+			}
+			
+			if(object_concept_details != null){
+				String object_concept = object_concept_details.get(0);
+				String object_concept_types = object_concept_details.get(1);
+				
+				List<String> object_concept_types_list = new ArrayList<String>(Arrays.asList(object_concept_types.split(",")));
+				String object_concept_type = getConceptType(object_concept_types_list);
+				
+				triple.setObjectConcept(object_concept);
+				triple.setObjectConceptType(object_concept_type);
+			}
+				
 			String relation_frame = relation_frames.get(relation);
 			
 			//Store in MMKGRelationTriple object
 			triple.setRelationFrame(relation_frame);
-			triple.setSubjectConcept(subject_concept);
-			triple.setObjectConcept(object_concept);
+
 		}
+	}
+	
+	public static String getConceptType(List<String> types){
+		
+		List<String> supported_types = Arrays.asList(DBpediaSpotlightConfig.SUPPORTED_TYPES);
+		
+		for(String type: types){
+			if(supported_types.contains(type)) {
+				return Integer.toString(supported_types.indexOf(type));
+			}
+		}
+		
+		return "99";
+		
 	}
 	
 	public static void generateTripleArticleStat(Article article) throws InterruptedException, JSONException{
@@ -422,11 +472,11 @@ public class AppWorker {
 		
 		// Generate gexf file for graph rendering
 		GexfGraph graph = new GexfGraph();
-		graph.createGraphFromTriples(triples);
+		graph.createGraphFromTriples(article.getTimestamp(),triples);
 		graph.exportGexfGraph("uncanonized");
 		
 		GexfGraph graph1 = new GexfGraph();
-		graph1.createGraphFromTriples(canonicalTriples);
+		graph1.createGraphFromTriples(article.getTimestamp(), canonicalTriples);
 		graph1.exportGexfGraph("canonized");
 		
 	}
