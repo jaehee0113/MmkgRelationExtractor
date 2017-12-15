@@ -11,60 +11,68 @@ entity_types = [
     "DBpedia:Organisation", "DBpedia:Work",
     "DBpedia:Language", "DBpedia:Animal",
     "DBpedia:Disease" #, Other type
-]
+] 
 
-def generate_gexf(ent_list, filename):
-    GraphT = threading.Thread(target=generate_gexf_t, args=(ent_list, filename))
-    GraphT.start()
-
-
-def generate_gexf_t(ent_list, filename):
-    # types = ["DBpedia:Person", "DBpedia:Place", "DBpedia:Organisation"]
-    print("start-generate_graph", filename)
-    G = nx.Graph()
-    for k, doc_ent in ent_list.items():
-        for x,y in itertools.combinations(doc_ent, 2):
-            nodes = []
-            for node in [x,y]:
-                if "types" in node:
-                    for t in entity_types:
-                        if t in node["types"]:
-                            nodes.append(node)
-                            G.add_node(node["concept"], type=entity_types.index(t))
-                else:
-                    nodes.append(node)
-                    G.add_node(node["concept"], type=len(entity_types))
-            if len(nodes) == 2:
-                if G.has_edge(nodes[0]["concept"], nodes[1]["concept"]):
-                    G[nodes[0]["concept"]][nodes[1]["concept"]]['weight'] += 1
-                else:
-                    G.add_edge(nodes[0]["concept"], nodes[1]["concept"],\
-                                weight=1, time=k.strftime("%Y-%m-%d"))
-
-    gname = "graph/{}".format(filename)
-    nx.write_gexf(G, gname)
-    print("finish-generate_graph", filename)
-    return
-
+# NOT USED AT THE MOMENT (generated from Java side)
+def generate_gexf(ent_list, filename): 
+    GraphT = threading.Thread(target=generate_gexf_t, args=(ent_list, filename)) 
+    GraphT.start() 
+ 
+# NOT USED AT THE MOMENT (generated from Java side)
+def generate_gexf_t(ent_list, filename): 
+    # types = ["DBpedia:Person", "DBpedia:Place", "DBpedia:Organisation"] 
+    print("start-generate_graph", filename) 
+    G = nx.Graph() 
+    for k, doc_ent in ent_list.items(): 
+        for x,y in itertools.combinations(doc_ent, 2): 
+            nodes = [] 
+            for node in [x,y]: 
+                if "types" in node: 
+                    for t in entity_types: 
+                        if t in node["types"]: 
+                            nodes.append(node) 
+                            G.add_node(node["concept"], type=entity_types.index(t)) 
+                else: 
+                    nodes.append(node) 
+                    G.add_node(node["concept"], type=len(entity_types)) 
+            if len(nodes) == 2: 
+                if G.has_edge(nodes[0]["concept"], nodes[1]["concept"]): 
+                    G[nodes[0]["concept"]][nodes[1]["concept"]]['weight'] += 1 
+                else: 
+                    G.add_edge(nodes[0]["concept"], nodes[1]["concept"],\ 
+                                weight=1, time=k.strftime("%Y-%m-%d")) 
+ 
+    gname = "graph/{}".format(filename) 
+    nx.write_gexf(G, gname) 
+    print("finish-generate_graph", filename) 
+    return 
 
 def create_graph(f, center, ntype, num, checked):
     G = nx.read_gexf(f)
 
     G_nodes = []
     G_links = []
+    typenodes = []
     n_from = 0
     n_to = num
 
     # filter checked types
-    typenodes = [n for n, d in G.nodes(data=True) if checked[d["type"]]]
+    for n, d in G.nodes(data=True):
+        if(d["type"] > len(checked)):
+            d["type"] = 7
+        if(checked[d["type"]]):
+            typenodes.append(n)
+
+    #typenodes = [n for n, d in G.nodes(data=True) if checked[d["type"]]]
+    
     G = G.subgraph(typenodes)
 
     to_keep = [k for k, d in sorted(G.degree(weight=True),key=itemgetter(1),reverse=True)]
     Subgraph = G.subgraph(to_keep[n_from:n_to])
 
     for n, d in Subgraph.nodes(data=True):
-        node = {"name": n, "group": d["type"]+1, "degree": G.degree(n)}
-        if d["type"] == len(entity_types):
+        node = {"name": n, "label": d["label"], "group": d["type"]+1, "ent_type": d['entity_type'], "degree": G.degree(n)}
+        if d["type"] >= len(entity_types):
             node["groupname"] = "Other"
         else:
             node["groupname"] = entity_types[d["type"]].split(":")[-1],
@@ -76,8 +84,8 @@ def create_graph(f, center, ntype, num, checked):
     names = [n["name"] for n in G_nodes]
 
     for s, t, v in Subgraph.edges(data=True):
-        G_links.append({"source": names.index(s), "target": names.index(t),\
-                        "value": v["weight"], "time": v["time"]})
+        G_links.append({"source": names.index(s), "target": names.index(t),
+                        "value": v["weight"], "time": v["time"], "label": v['label'], "url": v['url']})
 
     # print(G_nodes)
     # print(G_links)
