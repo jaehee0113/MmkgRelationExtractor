@@ -1,5 +1,9 @@
 package extractor.models;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,6 +26,7 @@ public class Article extends Docu implements IModel{
 	private String title;
 	private String description;
 	private boolean strict;
+	private boolean bulk;
 	private List<Sentence> sentences;
 	private List<MMKGRelationTriple> triples;
 	private List<String> subjects;
@@ -30,12 +35,45 @@ public class Article extends Docu implements IModel{
 	private List<String> known_entities;
 	private Date timestamp;
 	
-	public Article(String id, String title, String description, boolean strict){
+	public Article(String id, String title, String description, boolean strict, boolean bulk){
 		this.id = id;
 		this.title = title;
 		this.description = description;
 		this.strict = strict;
-		populateTriples();
+		//If enabled, the program will generate triples for every article in the index
+		//This slows down the mmkg extraction process. %so be careful%
+		if(this.bulk) populateTriples();
+	}
+	
+	public void populateTriplesFromFile() throws IOException{
+		
+		//Clear triples as pruned version of these will be used
+		this.triples.clear();
+		
+		try {
+			@SuppressWarnings("resource")
+			BufferedReader br = new BufferedReader(new FileReader("src/extractor/lib/files/" + this.getDocumentID() + "-completed.txt"));
+			String line = null;
+			while((line = br.readLine()) != null) {
+				Sentence sent = new Sentence(line);
+				for (RelationTriple triple : sent.openieTriples()){
+				   if(strict && triple.confidence == 1.0) {
+					   List<CoreLabel> canonicalSubjects = triple.canonicalSubject;
+					   List<CoreLabel> canonicalObjects = triple.canonicalObject;
+					   List<CoreLabel> relations = triple.relation;
+					   RelationTriple enhancedTriple = new RelationTriple(canonicalSubjects, relations, canonicalObjects, 1.0);
+					   MMKGRelationTriple mmkg_triple = new MMKGRelationTriple(enhancedTriple, sent);
+					   this.triples.add(mmkg_triple);				   
+				   }else if(!strict) {
+					   MMKGRelationTriple mmkg_triple = new MMKGRelationTriple(triple, sent);
+					   this.triples.add(mmkg_triple);				   
+				   }
+				}
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void populateTriples(){

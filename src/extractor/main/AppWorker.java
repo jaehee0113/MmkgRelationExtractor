@@ -1,13 +1,19 @@
 package extractor.main;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -28,6 +34,7 @@ import edu.stanford.nlp.simple.Document;
 import extractor.diff.DiffWorker;
 import extractor.elastic.controller.ElasticController;
 import extractor.export.gexf.GexfGraph;
+import extractor.lib.FileProcessor;
 import extractor.models.Article;
 import extractor.models.MMKGRelationTriple;
 import extractor.dbpedia.spotlight.client.DBpediaLookupClient;
@@ -42,6 +49,111 @@ import extractor.semafor.config.SemaforConfig;
 import extractor.semafor.controller.SemaforController;
 
 public class AppWorker {
+	
+	//Extracting multimedia knowledge graph as well as triples in many forms
+	public static void process(Article article){
+		
+		//First populate the triples with raw data
+		article.populateTriples();
+		
+		//Pruning the sentence generated
+		preprocess(article);
+		
+		//Generates statistics about an article
+		try {
+			generateTripleArticleStat(article);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		//generateTripleArticleStat(article2);
+		postprocess(article);
+	}
+	
+	public static void postprocess(Article article){
+		
+		//We do not need these files anymore (just used for preprocessing)
+		File file = new File("src/extractor/lib/files/" + article.getDocumentID() + ".txt");
+		File file1 = new File("src/extractor/lib/files/" + article.getDocumentID() + "-complete.txt");
+		File file2 = new File("src/extractor/lib/files/" + article.getDocumentID() + "-pruned.txt");
+		File file3 = new File("src/extractor/lib/files/" + article.getDocumentID() + "-completed.txt");
+
+		
+		file.delete();
+		file1.delete();
+		file2.delete();
+		file3.delete();
+	}
+	
+	public static void preprocess(Article article){
+		try {
+			List<String> sentences = FileProcessor.getSentencesFromArticle(article);
+			FileProcessor.writeFile(sentences, article.getDocumentID());
+			
+			//Remove empty lines
+			BufferedReader br = new BufferedReader(new FileReader("src/extractor/lib/files/" + article.getDocumentID() + ".txt"));
+			PrintWriter outputFile = new PrintWriter(new FileWriter("src/extractor/lib/files/" + article.getDocumentID() + "-pruned.txt"));
+			
+			String line = null;
+			while((line = br.readLine()) != null) {
+				if("".equals(line.trim())){
+					continue;
+				}
+				outputFile.println(line);
+				outputFile.flush();
+			}
+			
+			br.close();
+			outputFile.close();
+			
+			// . if the end of line does not end with it.
+			PrintWriter outputFile2 = new PrintWriter(new FileWriter("src/extractor/lib/files/" + article.getDocumentID() + "-complete.txt"));
+			BufferedReader br2 = new BufferedReader(new FileReader("src/extractor/lib/files/" + article.getDocumentID() + "-pruned.txt"));
+			String line2 = null;
+			while((line2 = br2.readLine()) != null) {
+				
+				if(line2.charAt(line2.length() - 1) != '.'){
+					outputFile2.println(line2 + ".");
+					outputFile2.flush();
+				}else{
+					outputFile2.println(line2);
+					outputFile2.flush();
+				}
+			}
+			br2.close();
+			outputFile2.close();
+			
+			//Remove duplicate lines
+			BufferedReader br3 = new BufferedReader(new FileReader("src/extractor/lib/files/" + article.getDocumentID() + "-complete.txt"));
+			Set<String> lines = new HashSet<String>(10000);
+			String line5;
+			while ((line5 = br3.readLine()) != null) {
+				lines.add(line5);
+			}
+			
+			br3.close();
+			
+			BufferedWriter outputFile3 = new BufferedWriter(new FileWriter("src/extractor/lib/files/" + article.getDocumentID() + "-completed.txt"));
+			for (String unique : lines) {
+			   outputFile3.write(unique);
+			   outputFile3.newLine();
+			}
+			   
+			outputFile3.close();
+			
+			article.populateTriplesFromFile();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	}
 	
 	public static String extractConceptFromDBPLookup(String text){
 		DBpediaLookupClient controller;
@@ -108,13 +220,12 @@ public class AppWorker {
 	}
 	
 	public static Map<String, String> getFrames(Article article) throws InterruptedException, JSONException{
-		List<MMKGRelationTriple> triples = article.getTriples();
 		Map<String, String> relation_frame = new HashMap<String,String>();
 		Runtime rt = Runtime.getRuntime();
 		
 		try {
 			
-			Process pr = rt.exec( SemaforConfig.MALT_PARSER_SHELL_DIR + " " + SemaforConfig.INPUT_FILE_DIR + article.getDocumentID() + ".txt" + " " + SemaforConfig.OUTPUT_DIR);
+			Process pr = rt.exec( SemaforConfig.MALT_PARSER_SHELL_DIR + " " + SemaforConfig.INPUT_FILE_DIR + article.getDocumentID() + "-completed.txt" + " " + SemaforConfig.OUTPUT_DIR);
 			BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 			 
             String line=null;
@@ -149,12 +260,8 @@ public class AppWorker {
     			pr = rt.exec(cmd2);
                 BufferedReader input2 = new BufferedReader(new InputStreamReader(pr.getInputStream()));
                 String line2 =null;
-                
-                int sent_idx = 0;
+               
                 while((line2 = input2.readLine()) != null) {
-                	
-                	MMKGRelationTriple triple = triples.get(sent_idx);
-                	String relation = triple.getTriple().relationGloss();
                 	
                 	JSONObject result = new JSONObject(line2);
                 	JSONArray frames = result.getJSONArray("frames");
@@ -165,12 +272,10 @@ public class AppWorker {
     					JSONObject text_object = spans.getJSONObject(0);
     					String text = text_object.getString("text");
     					String name = frame.getJSONObject("target").getString("name");
-    					if(relation.contains(text)) {
-    						relation_frame.put(relation, name);
-    					}
+    					//System.out.println("Text: " + text + " Frame: " + name);
+    					relation_frame.put(text,name);
     				}
-    
-    				++sent_idx;
+ 
                 }
                 
             }
@@ -234,11 +339,15 @@ public class AppWorker {
 				triple.setObjectConcept(object_concept);
 				triple.setObjectConceptType(object_concept_type);
 			}
-				
-			String relation_frame = relation_frames.get(relation);
 			
-			//Store in MMKGRelationTriple object
-			triple.setRelationFrame(relation_frame);
+			//Finding frame for the relation
+			for (Map.Entry<String, String> e : relation_frames.entrySet()) {
+				if(relation.contains(e.getKey())){
+					//System.out.println("Text: " + e.getKey() + " Frame: " + e.getValue());
+					//Store in MMKGRelationTriple object
+					triple.setRelationFrame(e.getValue());
+				}
+			}
 
 		}
 	}
@@ -516,7 +625,7 @@ public class AppWorker {
 				
 				String description = (String) sourceJSON.get("description");
 				
-				Article article = new Article( article_id, (String) sourceJSON.get("title"), description, true);
+				Article article = new Article( article_id, (String) sourceJSON.get("title"), description, true, false);
 				
 				//Populating known entities properties of an article
 				ArrayList<String> known_entities = new ArrayList<String>();

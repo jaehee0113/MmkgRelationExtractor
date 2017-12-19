@@ -44,7 +44,7 @@ public class FileProcessor {
     public static void writeFile(List<String> sentences, String out_file_name){
     	    	
     	try {
-			PrintWriter writer = new PrintWriter(out_file_name + ".txt", "UTF-8");
+			PrintWriter writer = new PrintWriter("src/extractor/lib/files/" + out_file_name + ".txt", "UTF-8");
 			
 			for(String sent: sentences){
 				writer.println(sent);
