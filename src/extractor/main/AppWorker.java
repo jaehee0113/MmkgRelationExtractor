@@ -1,64 +1,291 @@
 package extractor.main;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.URL;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
 
 import javax.xml.bind.DatatypeConverter;
 
 import org.dbpedia.spotlight.exceptions.AnnotationException;
-import org.dbpedia.spotlight.model.DBpediaResource;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.stanford.nlp.ie.util.RelationTriple;
+
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.simple.Document;
 import extractor.diff.DiffWorker;
 import extractor.elastic.controller.ElasticController;
 import extractor.export.gexf.GexfGraph;
+import extractor.lib.FileProcessor;
 import extractor.models.Article;
-import extractor.models.Docu;
 import extractor.models.MMKGRelationTriple;
+import extractor.dbpedia.spotlight.client.DBpediaLookupClient;
 import extractor.dbpedia.spotlight.client.DBpediaSpotlightClient;
+import extractor.dbpedia.spotlight.config.DBpediaSpotlightConfig;
 import extractor.dbpedia.spotlight.controller.DBpediaSpotlightController;
 import extractor.parser.CorefWorker;
 import extractor.parser.SentenceWorker;
 import extractor.parser.TripleWorker;
 import extractor.semafor.client.SemaforClient;
+import extractor.semafor.config.SemaforConfig;
 import extractor.semafor.controller.SemaforController;
 
 public class AppWorker {
 	
-	public static String extractConceptFromDBP(String text){
+	//Extracting multimedia knowledge graph as well as triples in many forms
+	public static void process(Article article){
+		
+		//First populate the triples with raw data
+		article.populateTriples();
+		
+		//Pruning the sentence generated
+		preprocess(article);
+		
+		//Generates statistics about an article
+		try {
+			generateTripleArticleStat(article);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		//generateTripleArticleStat(article2);
+		postprocess(article);
+	}
+	
+	public static void postprocess(Article article){
+		
+		//We do not need these files anymore (just used for preprocessing)
+		File file = new File("src/extractor/lib/files/" + article.getDocumentID() + ".txt");
+		File file1 = new File("src/extractor/lib/files/" + article.getDocumentID() + "-complete.txt");
+		File file2 = new File("src/extractor/lib/files/" + article.getDocumentID() + "-pruned.txt");
+		File file3 = new File("src/extractor/lib/files/" + article.getDocumentID() + "-completed.txt");
+
+		
+		file.delete();
+		file1.delete();
+		file2.delete();
+		file3.delete();
+	}
+	
+	public static void preprocess(Article article){
+		try {
+			List<String> sentences = FileProcessor.getSentencesFromArticle(article);
+			FileProcessor.writeFile(sentences, article.getDocumentID());
+			
+			//Remove empty lines
+			BufferedReader br = new BufferedReader(new FileReader("src/extractor/lib/files/" + article.getDocumentID() + ".txt"));
+			PrintWriter outputFile = new PrintWriter(new FileWriter("src/extractor/lib/files/" + article.getDocumentID() + "-pruned.txt"));
+			
+			String line = null;
+			while((line = br.readLine()) != null) {
+				if("".equals(line.trim())){
+					continue;
+				}
+				outputFile.println(line);
+				outputFile.flush();
+			}
+			
+			br.close();
+			outputFile.close();
+			
+			// . if the end of line does not end with it.
+			PrintWriter outputFile2 = new PrintWriter(new FileWriter("src/extractor/lib/files/" + article.getDocumentID() + "-complete.txt"));
+			BufferedReader br2 = new BufferedReader(new FileReader("src/extractor/lib/files/" + article.getDocumentID() + "-pruned.txt"));
+			String line2 = null;
+			while((line2 = br2.readLine()) != null) {
+				
+				if(line2.charAt(line2.length() - 1) != '.'){
+					outputFile2.println(line2 + ".");
+					outputFile2.flush();
+				}else{
+					outputFile2.println(line2);
+					outputFile2.flush();
+				}
+			}
+			br2.close();
+			outputFile2.close();
+			
+			//Remove duplicate lines
+			BufferedReader br3 = new BufferedReader(new FileReader("src/extractor/lib/files/" + article.getDocumentID() + "-complete.txt"));
+			Set<String> lines = new HashSet<String>(10000);
+			String line5;
+			while ((line5 = br3.readLine()) != null) {
+				lines.add(line5);
+			}
+			
+			br3.close();
+			
+			BufferedWriter outputFile3 = new BufferedWriter(new FileWriter("src/extractor/lib/files/" + article.getDocumentID() + "-completed.txt"));
+			for (String unique : lines) {
+			   outputFile3.write(unique);
+			   outputFile3.newLine();
+			}
+			   
+			outputFile3.close();
+			
+			article.populateTriplesFromFile();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	}
+	
+	public static String extractConceptFromDBPLookup(String text){
+		DBpediaLookupClient controller;
+		try {
+			controller = new DBpediaLookupClient(text);
+			Map<String, String> result = controller.getResult();
+			String the_result = result.get("URI");
+			
+			if(the_result == null)return null;
+			else return the_result;
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	public static List<String> extractConceptFromDBP(String entity, String text){
+		
+		List<String> return_obj = new ArrayList<String>();
+		
 		DBpediaSpotlightClient client = DBpediaSpotlightClient.getInstance();
 		DBpediaSpotlightController controller = new DBpediaSpotlightController(client);
 		try {
-			Map<String, HashMap<String, String>> result = controller.extractFromString(text);
-			HashMap<String, String> the_result = result.get(text);
 			
-			if(the_result == null)return null;
-			else return the_result.get("URI");
+			Map<String, HashMap<String, String>> result = controller.extractFromString(text);
+			
+			
+			Map<String, HashMap<String, String>> ent_result = controller.extractFromString(entity);
+			HashMap<String, String> the_ent_result = ent_result.get(entity);
+			
+			//if cannot be found from string do another matching just by putting in subject or object
+
+			if(the_ent_result == null) {
+				for (Map.Entry<String, HashMap<String, String>> e : result.entrySet()) {
+					if(entity.contains(e.getKey())) {
+						Map<String, String> sub_result = e.getValue();
+						return_obj.add(sub_result.get("URI"));
+						return_obj.add(sub_result.get("types"));
+						return return_obj;
+					}	
+				}
+			}else {
+				
+				return_obj.add(the_ent_result.get("URI"));
+				return_obj.add(the_ent_result.get("types"));
+				
+				return return_obj;	
+			} 
 			
 		} catch (AnnotationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+		//If still not getting any result, try DBpedia lookup
+		//String final_result = extractConceptFromDBPLookup(entity);
+		//if(final_result != null) {
+		//	return final_result;
+		//}
+		
 		return null;
+	}
+	
+	public static Map<String, String> getFrames(Article article) throws InterruptedException, JSONException{
+		Map<String, String> relation_frame = new HashMap<String,String>();
+		Runtime rt = Runtime.getRuntime();
+		
+		try {
+			
+			Process pr = rt.exec( SemaforConfig.MALT_PARSER_SHELL_DIR + " " + SemaforConfig.INPUT_FILE_DIR + article.getDocumentID() + "-completed.txt" + " " + SemaforConfig.OUTPUT_DIR);
+			BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			 
+            String line=null;
+
+            while((line=input.readLine()) != null) {
+                System.out.println(line);
+            }
+
+            int exitVal = pr.waitFor();
+            System.out.println("Exited with error code " + exitVal);
+            
+            if(exitVal == 1) {
+            	
+	            BufferedReader errinput = new BufferedReader(new InputStreamReader(
+	            		pr.getErrorStream()));
+	            String line2 =null;
+	
+	            while((line2 = errinput.readLine()) != null) {
+	                System.out.println(line2);
+	            }
+            
+            }
+            
+            if(exitVal == 0) {
+    			String[] cmd2 = {
+    					"/bin/sh",
+    					"-c",
+    					"cat /home/admin-u4722839/Desktop/semafor/output/conll | nc localhost 8888"
+    			};
+    			
+    			
+    			pr = rt.exec(cmd2);
+                BufferedReader input2 = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+                String line2 =null;
+               
+                while((line2 = input2.readLine()) != null) {
+                	
+                	JSONObject result = new JSONObject(line2);
+                	JSONArray frames = result.getJSONArray("frames");
+                	
+    				for(int j = 0; j < frames.length(); j++){
+    					JSONObject frame = frames.getJSONObject(j);
+    					JSONArray spans = frame.getJSONObject("target").getJSONArray("spans");
+    					JSONObject text_object = spans.getJSONObject(0);
+    					String text = text_object.getString("text");
+    					String name = frame.getJSONObject("target").getString("name");
+    					//System.out.println("Text: " + text + " Frame: " + name);
+    					relation_frame.put(text,name);
+    				}
+ 
+                }
+                
+            }
+		
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return relation_frame;
 	}
 	
 	public static String extractRelationFrameFromSemafor(String relation, String text){
@@ -76,7 +303,9 @@ public class AppWorker {
 		return null;
 	}
 	
-	public static void extractCanonicalForm(Article article){
+	public static void extractCanonicalForm(Article article) throws InterruptedException, JSONException{
+		
+		Map<String,String> relation_frames = getFrames(article);
 		
 		List<MMKGRelationTriple> triples = article.getTriples();
 		for(MMKGRelationTriple triple: triples) {
@@ -85,20 +314,59 @@ public class AppWorker {
 			String object = triple.getTriple().objectLemmaGloss();
 			String relation = triple.getTriple().relationGloss();
 			
-			//Extracting canonical form of a triple
+			List<String> subject_concept_details = extractConceptFromDBP(subject, triple.getSentenceToString());
+			List<String> object_concept_details = extractConceptFromDBP(object, triple.getSentenceToString());
+						
+			if(subject_concept_details != null){
+				String subject_concept = subject_concept_details.get(0);
+				String subject_concept_types = subject_concept_details.get(1);	
+				
+				
+				List<String> subject_concept_types_list = new ArrayList<String>(Arrays.asList(subject_concept_types.split(",")));
+				String subject_concept_type = getConceptType(subject_concept_types_list);
+				
+				triple.setSubjectConcept(subject_concept);
+				triple.setSubjectConceptType(subject_concept_type);
+			}
 			
-			String subject_concept = extractConceptFromDBP(subject);
-			String object_concept = extractConceptFromDBP(object);
-			String relation_frame = extractRelationFrameFromSemafor(relation, triple.getSentenceToString());
+			if(object_concept_details != null){
+				String object_concept = object_concept_details.get(0);
+				String object_concept_types = object_concept_details.get(1);
+				
+				List<String> object_concept_types_list = new ArrayList<String>(Arrays.asList(object_concept_types.split(",")));
+				String object_concept_type = getConceptType(object_concept_types_list);
+				
+				triple.setObjectConcept(object_concept);
+				triple.setObjectConceptType(object_concept_type);
+			}
 			
-			//Store in MMKGRelationTriple object
-			triple.setRelationFrame(relation_frame);
-			triple.setSubjectConcept(subject_concept);
-			triple.setObjectConcept(object_concept);
+			//Finding frame for the relation
+			for (Map.Entry<String, String> e : relation_frames.entrySet()) {
+				if(relation.contains(e.getKey())){
+					//System.out.println("Text: " + e.getKey() + " Frame: " + e.getValue());
+					//Store in MMKGRelationTriple object
+					triple.setRelationFrame(e.getValue());
+				}
+			}
+
 		}
 	}
 	
-	public static void generateTripleArticleStat(Article article){
+	public static String getConceptType(List<String> types){
+		
+		List<String> supported_types = Arrays.asList(DBpediaSpotlightConfig.SUPPORTED_TYPES);
+		
+		for(String type: types){
+			if(supported_types.contains(type)) {
+				return Integer.toString(supported_types.indexOf(type));
+			}
+		}
+		
+		return "99";
+		
+	}
+	
+	public static void generateTripleArticleStat(Article article) throws InterruptedException, JSONException{
 		
 		//First extract canonical form
 		extractCanonicalForm(article);
@@ -313,11 +581,11 @@ public class AppWorker {
 		
 		// Generate gexf file for graph rendering
 		GexfGraph graph = new GexfGraph();
-		graph.createGraphFromTriples(triples);
+		graph.createGraphFromTriples(article.getTimestamp(),triples);
 		graph.exportGexfGraph("uncanonized");
 		
 		GexfGraph graph1 = new GexfGraph();
-		graph1.createGraphFromTriples(canonicalTriples);
+		graph1.createGraphFromTriples(article.getTimestamp(), canonicalTriples);
 		graph1.exportGexfGraph("canonized");
 		
 	}
@@ -357,7 +625,7 @@ public class AppWorker {
 				
 				String description = (String) sourceJSON.get("description");
 				
-				Article article = new Article( article_id, (String) sourceJSON.get("title"), description, true);
+				Article article = new Article( article_id, (String) sourceJSON.get("title"), description, true, false);
 				
 				//Populating known entities properties of an article
 				ArrayList<String> known_entities = new ArrayList<String>();

@@ -83,6 +83,8 @@ public class DBpediaSpotlightController extends AnnotationClient{
 				details.put("URI", entity.getString("@URI"));
 				details.put("support", entity.getString("@support"));
 				details.put("similarity", entity.getString("@similarityScore"));
+				details.put("surface", entity.getString("@surfaceForm"));
+				details.put("types", entity.getString("@types"));
 				resources.put(entity.getString("@surfaceForm"), details);
 				
 			} catch (JSONException e) {
@@ -131,7 +133,7 @@ public class DBpediaSpotlightController extends AnnotationClient{
 		String spotlightResponse;
 		
 		try {
-			GetMethod getMethod = new GetMethod(DBpediaSpotlightConfig.API_URL + "/en/annotate/?" +
+			GetMethod getMethod = new GetMethod(DBpediaSpotlightConfig.API_URL + "/annotate/?" +
 					"confidence=" + DBpediaSpotlightConfig.CONFIDENCE
 					+ "&support=" + DBpediaSpotlightConfig.SUPPORT
 					+ "&text=" + URLEncoder.encode(text, "utf-8"));

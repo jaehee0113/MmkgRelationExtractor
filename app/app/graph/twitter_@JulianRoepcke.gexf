@@ -1,0 +1,1519 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gexf version="1.2" xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema-instance">
+  <graph defaultedgetype="undirected" mode="static" name="">
+    <attributes class="edge" mode="static">
+      <attribute id="1" title="time" type="string" />
+    </attributes>
+    <attributes class="node" mode="static">
+      <attribute id="0" title="type" type="long" />
+    </attributes>
+    <meta>
+      <creator>NetworkX 2.0</creator>
+      <lastmodified>13/11/2017</lastmodified>
+    </meta>
+    <nodes>
+      <node id="Ukraine" label="Ukraine">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Minsk" label="Minsk">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Russia" label="Russia">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Hama" label="Hama">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Syria" label="Syria">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Hans-Dietrich_Genscher" label="Hans-Dietrich_Genscher">
+        <attvalues>
+          <attvalue for="0" value="0" />
+        </attvalues>
+      </node>
+      <node id="Anadan" label="Anadan">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Bashar_al-Assad" label="Bashar_al-Assad">
+        <attvalues>
+          <attvalue for="0" value="0" />
+        </attvalues>
+      </node>
+      <node id="Aleppo" label="Aleppo">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Japan_Self-Defense_Forces" label="Japan_Self-Defense_Forces">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Scotland" label="Scotland">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="United_Kingdom" label="United_Kingdom">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Russian_language" label="Russian_language">
+        <attvalues>
+          <attvalue for="0" value="4" />
+        </attvalues>
+      </node>
+      <node id="Turkey" label="Turkey">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="South_African_Airways" label="South_African_Airways">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Donetsk" label="Donetsk">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="BBC" label="BBC">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Bild" label="Bild">
+        <attvalues>
+          <attvalue for="0" value="3" />
+        </attvalues>
+      </node>
+      <node id="Al-Lataminah" label="Al-Lataminah">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Unstoppable_(2010_film)" label="Unstoppable_(2010_film)">
+        <attvalues>
+          <attvalue for="0" value="3" />
+        </attvalues>
+      </node>
+      <node id="Idlib" label="Idlib">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Google" label="Google">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Germany" label="Germany">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Great_Britain" label="Great_Britain">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Free_Syrian_Army" label="Free_Syrian_Army">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Homs" label="Homs">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="This_TV" label="This_TV">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Palmyra" label="Palmyra">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Nur,_Poland" label="Nur,_Poland">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Ganz_Works" label="Ganz_Works">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="United_States" label="United_States">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Idlib_Governorate" label="Idlib_Governorate">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Kidnapped_(novel)" label="Kidnapped_(novel)">
+        <attvalues>
+          <attvalue for="0" value="3" />
+        </attvalues>
+      </node>
+      <node id="Caged" label="Caged">
+        <attvalues>
+          <attvalue for="0" value="3" />
+        </attvalues>
+      </node>
+      <node id="Iraq" label="Iraq">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Poliomyelitis" label="Poliomyelitis">
+        <attvalues>
+          <attvalue for="0" value="6" />
+        </attvalues>
+      </node>
+      <node id="Daraa" label="Daraa">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Crimea" label="Crimea">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Unbelievable_(EMF_song)" label="Unbelievable_(EMF_song)">
+        <attvalues>
+          <attvalue for="0" value="3" />
+        </attvalues>
+      </node>
+      <node id="Harasta" label="Harasta">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Wikipedia" label="Wikipedia">
+        <attvalues>
+          <attvalue for="0" value="3" />
+        </attvalues>
+      </node>
+      <node id="Today_(U.S._TV_program)" label="Today_(U.S._TV_program)">
+        <attvalues>
+          <attvalue for="0" value="3" />
+        </attvalues>
+      </node>
+      <node id="Azaz" label="Azaz">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Daraya" label="Daraya">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Al_Rai" label="Al_Rai">
+        <attvalues>
+          <attvalue for="0" value="3" />
+        </attvalues>
+      </node>
+      <node id="Israel_Defense_Forces" label="Israel_Defense_Forces">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Israel" label="Israel">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Al-Rastan" label="Al-Rastan">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Massachusetts_Institute_of_Technology" label="Massachusetts_Institute_of_Technology">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Yandex" label="Yandex">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Latakia_Governorate" label="Latakia_Governorate">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Damascus" label="Damascus">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Iran" label="Iran">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Austria" label="Austria">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="People's_Representative_Council" label="People's_Representative_Council">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Organization_for_Security_and_Co-operation_in_Europe" label="Organization_for_Security_and_Co-operation_in_Europe">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Jeep" label="Jeep">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Vladimir_Putin" label="Vladimir_Putin">
+        <attvalues>
+          <attvalue for="0" value="0" />
+        </attvalues>
+      </node>
+      <node id="Blindness" label="Blindness">
+        <attvalues>
+          <attvalue for="0" value="6" />
+        </attvalues>
+      </node>
+      <node id="Turkish_Army" label="Turkish_Army">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Al-Zabadani" label="Al-Zabadani">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Twitter" label="Twitter">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="ONE_Campaign" label="ONE_Campaign">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="International_Red_Cross_and_Red_Crescent_Movement" label="International_Red_Cross_and_Red_Crescent_Movement">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Ariha,_Syria" label="Ariha,_Syria">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="PPL_(utility)" label="PPL_(utility)">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Atarib" label="Atarib">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Breach_(band)" label="Breach_(band)">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Old_French" label="Old_French">
+        <attvalues>
+          <attvalue for="0" value="4" />
+        </attvalues>
+      </node>
+      <node id="Al-Ghantu" label="Al-Ghantu">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Egypt" label="Egypt">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Qamishli" label="Qamishli">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Euphrates" label="Euphrates">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="United_Nations" label="United_Nations">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Frontline_(U.S._TV_series)" label="Frontline_(U.S._TV_series)">
+        <attvalues>
+          <attvalue for="0" value="3" />
+        </attvalues>
+      </node>
+      <node id="Saladin" label="Saladin">
+        <attvalues>
+          <attvalue for="0" value="0" />
+        </attvalues>
+      </node>
+      <node id="Kilis" label="Kilis">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Ukrainian_language" label="Ukrainian_language">
+        <attvalues>
+          <attvalue for="0" value="4" />
+        </attvalues>
+      </node>
+      <node id="Jarabulus" label="Jarabulus">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="German_language" label="German_language">
+        <attvalues>
+          <attvalue for="0" value="4" />
+        </attvalues>
+      </node>
+      <node id="Outrageous!" label="Outrageous!">
+        <attvalues>
+          <attvalue for="0" value="3" />
+        </attvalues>
+      </node>
+      <node id="I_Predict" label="I_Predict">
+        <attvalues>
+          <attvalue for="0" value="3" />
+        </attvalues>
+      </node>
+      <node id="RT_(TV_network)" label="RT_(TV_network)">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Wissen" label="Wissen">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Guess_(clothing)" label="Guess_(clothing)">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Israeli_Air_Force" label="Israeli_Air_Force">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Sarmada" label="Sarmada">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Facebook" label="Facebook">
+        <attvalues>
+          <attvalue for="0" value="3" />
+        </attvalues>
+      </node>
+      <node id="Yes_(band)" label="Yes_(band)">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="CoH_(musician)" label="CoH_(musician)">
+        <attvalues>
+          <attvalue for="0" value="0" />
+        </attvalues>
+      </node>
+      <node id="Jordanian_Armed_Forces" label="Jordanian_Armed_Forces">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Dresden" label="Dresden">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Heute" label="Heute">
+        <attvalues>
+          <attvalue for="0" value="3" />
+        </attvalues>
+      </node>
+      <node id="Berlin" label="Berlin">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Kurdistan_Workers'_Party" label="Kurdistan_Workers'_Party">
+        <attvalues>
+          <attvalue for="0" value="2" />
+        </attvalues>
+      </node>
+      <node id="Mardin_Province" label="Mardin_Province">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Turkish_language" label="Turkish_language">
+        <attvalues>
+          <attvalue for="0" value="4" />
+        </attvalues>
+      </node>
+      <node id="Quneitra" label="Quneitra">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Kefraya" label="Kefraya">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Da'el" label="Da'el">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Mikhail_Tal" label="Mikhail_Tal">
+        <attvalues>
+          <attvalue for="0" value="0" />
+        </attvalues>
+      </node>
+      <node id="Sindh" label="Sindh">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+      <node id="Iceland" label="Iceland">
+        <attvalues>
+          <attvalue for="0" value="1" />
+        </attvalues>
+      </node>
+    </nodes>
+    <edges>
+      <edge id="0" source="Ukraine" target="Minsk" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-06-24" />
+        </attvalues>
+      </edge>
+      <edge id="1" source="Ukraine" target="Ukraine" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-06-24" />
+        </attvalues>
+      </edge>
+      <edge id="2" source="Ukraine" target="Russia" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-11-30" />
+        </attvalues>
+      </edge>
+      <edge id="3" source="Ukraine" target="Russian_language" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-28" />
+        </attvalues>
+      </edge>
+      <edge id="4" source="Ukraine" target="Bild" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-07-29" />
+        </attvalues>
+      </edge>
+      <edge id="5" source="Ukraine" target="Massachusetts_Institute_of_Technology" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-07-29" />
+        </attvalues>
+      </edge>
+      <edge id="6" source="Ukraine" target="United_Nations" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-07-29" />
+        </attvalues>
+      </edge>
+      <edge id="7" source="Minsk" target="Organization_for_Security_and_Co-operation_in_Europe" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-31" />
+        </attvalues>
+      </edge>
+      <edge id="8" source="Russia" target="Hama" weight="3">
+        <attvalues>
+          <attvalue for="1" value="2016-05-20" />
+        </attvalues>
+      </edge>
+      <edge id="9" source="Russia" target="Syria" weight="11">
+        <attvalues>
+          <attvalue for="1" value="2016-05-20" />
+        </attvalues>
+      </edge>
+      <edge id="10" source="Russia" target="Idlib" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-06-01" />
+        </attvalues>
+      </edge>
+      <edge id="11" source="Russia" target="Al-Lataminah" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-02-24" />
+        </attvalues>
+      </edge>
+      <edge id="12" source="Russia" target="Kidnapped_(novel)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-12" />
+        </attvalues>
+      </edge>
+      <edge id="13" source="Russia" target="Caged" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-12" />
+        </attvalues>
+      </edge>
+      <edge id="14" source="Russia" target="Aleppo" weight="5">
+        <attvalues>
+          <attvalue for="1" value="2016-06-25" />
+        </attvalues>
+      </edge>
+      <edge id="15" source="Russia" target="Bashar_al-Assad" weight="5">
+        <attvalues>
+          <attvalue for="1" value="2016-03-01" />
+        </attvalues>
+      </edge>
+      <edge id="16" source="Russia" target="Japan_Self-Defense_Forces" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-01" />
+        </attvalues>
+      </edge>
+      <edge id="17" source="Russia" target="Ariha,_Syria" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-06-02" />
+        </attvalues>
+      </edge>
+      <edge id="18" source="Russia" target="PPL_(utility)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-06-02" />
+        </attvalues>
+      </edge>
+      <edge id="19" source="Russia" target="Latakia_Governorate" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-02-23" />
+        </attvalues>
+      </edge>
+      <edge id="20" source="Russia" target="Palmyra" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-24" />
+        </attvalues>
+      </edge>
+      <edge id="21" source="Russia" target="Israeli_Air_Force" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-06-11" />
+        </attvalues>
+      </edge>
+      <edge id="22" source="Russia" target="CoH_(musician)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-05-29" />
+        </attvalues>
+      </edge>
+      <edge id="23" source="Hama" target="Syria" weight="7">
+        <attvalues>
+          <attvalue for="1" value="2016-05-20" />
+        </attvalues>
+      </edge>
+      <edge id="24" source="Hama" target="Bashar_al-Assad" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-03-24" />
+        </attvalues>
+      </edge>
+      <edge id="25" source="Hama" target="Al-Lataminah" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-02-24" />
+        </attvalues>
+      </edge>
+      <edge id="26" source="Hama" target="Aleppo" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-02-25" />
+        </attvalues>
+      </edge>
+      <edge id="27" source="Syria" target="Bashar_al-Assad" weight="21">
+        <attvalues>
+          <attvalue for="1" value="2016-03-24" />
+        </attvalues>
+      </edge>
+      <edge id="28" source="Syria" target="Free_Syrian_Army" weight="4">
+        <attvalues>
+          <attvalue for="1" value="2016-02-25" />
+        </attvalues>
+      </edge>
+      <edge id="29" source="Syria" target="Aleppo" weight="12">
+        <attvalues>
+          <attvalue for="1" value="2016-02-25" />
+        </attvalues>
+      </edge>
+      <edge id="30" source="Syria" target="Homs" weight="7">
+        <attvalues>
+          <attvalue for="1" value="2016-10-23" />
+        </attvalues>
+      </edge>
+      <edge id="31" source="Syria" target="Palmyra" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-05-05" />
+        </attvalues>
+      </edge>
+      <edge id="32" source="Syria" target="Al-Lataminah" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-02-24" />
+        </attvalues>
+      </edge>
+      <edge id="33" source="Syria" target="Turkey" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-24" />
+        </attvalues>
+      </edge>
+      <edge id="34" source="Syria" target="Idlib_Governorate" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-11" />
+        </attvalues>
+      </edge>
+      <edge id="35" source="Syria" target="Poliomyelitis" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-28" />
+        </attvalues>
+      </edge>
+      <edge id="36" source="Syria" target="Daraa" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-28" />
+        </attvalues>
+      </edge>
+      <edge id="37" source="Syria" target="Today_(U.S._TV_program)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-09-12" />
+        </attvalues>
+      </edge>
+      <edge id="38" source="Syria" target="Azaz" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-12" />
+        </attvalues>
+      </edge>
+      <edge id="39" source="Syria" target="Al_Rai" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-19" />
+        </attvalues>
+      </edge>
+      <edge id="40" source="Syria" target="Israel_Defense_Forces" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-08-19" />
+        </attvalues>
+      </edge>
+      <edge id="41" source="Syria" target="Syria" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-08-19" />
+        </attvalues>
+      </edge>
+      <edge id="42" source="Syria" target="Israel" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-08-19" />
+        </attvalues>
+      </edge>
+      <edge id="43" source="Syria" target="Al-Rastan" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-11" />
+        </attvalues>
+      </edge>
+      <edge id="44" source="Syria" target="Daraya" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-02-23" />
+        </attvalues>
+      </edge>
+      <edge id="45" source="Syria" target="Jeep" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-21" />
+        </attvalues>
+      </edge>
+      <edge id="46" source="Syria" target="Vladimir_Putin" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-11-15" />
+        </attvalues>
+      </edge>
+      <edge id="47" source="Syria" target="Al-Zabadani" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-23" />
+        </attvalues>
+      </edge>
+      <edge id="48" source="Syria" target="International_Red_Cross_and_Red_Crescent_Movement" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-26" />
+        </attvalues>
+      </edge>
+      <edge id="49" source="Syria" target="Al-Ghantu" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-06-22" />
+        </attvalues>
+      </edge>
+      <edge id="50" source="Syria" target="Egypt" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-05-17" />
+        </attvalues>
+      </edge>
+      <edge id="51" source="Syria" target="Damascus" weight="3">
+        <attvalues>
+          <attvalue for="1" value="2016-05-17" />
+        </attvalues>
+      </edge>
+      <edge id="52" source="Syria" target="Qamishli" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-05-17" />
+        </attvalues>
+      </edge>
+      <edge id="53" source="Syria" target="Latakia_Governorate" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-02-23" />
+        </attvalues>
+      </edge>
+      <edge id="54" source="Syria" target="Bild" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-11-15" />
+        </attvalues>
+      </edge>
+      <edge id="55" source="Syria" target="Turkish_Army" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-24" />
+        </attvalues>
+      </edge>
+      <edge id="56" source="Syria" target="Jarabulus" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-24" />
+        </attvalues>
+      </edge>
+      <edge id="57" source="Syria" target="Israeli_Air_Force" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-06-11" />
+        </attvalues>
+      </edge>
+      <edge id="58" source="Syria" target="Idlib" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-07-06" />
+        </attvalues>
+      </edge>
+      <edge id="59" source="Syria" target="Yes_(band)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-08" />
+        </attvalues>
+      </edge>
+      <edge id="60" source="Syria" target="CoH_(musician)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-05-29" />
+        </attvalues>
+      </edge>
+      <edge id="61" source="Syria" target="Jordanian_Armed_Forces" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-05-06" />
+        </attvalues>
+      </edge>
+      <edge id="62" source="Syria" target="Iran" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-23" />
+        </attvalues>
+      </edge>
+      <edge id="63" source="Syria" target="Kefraya" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-23" />
+        </attvalues>
+      </edge>
+      <edge id="64" source="Bashar_al-Assad" target="Aleppo" weight="8">
+        <attvalues>
+          <attvalue for="1" value="2016-08-25" />
+        </attvalues>
+      </edge>
+      <edge id="65" source="Bashar_al-Assad" target="Russian_language" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-28" />
+        </attvalues>
+      </edge>
+      <edge id="66" source="Bashar_al-Assad" target="Turkey" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-28" />
+        </attvalues>
+      </edge>
+      <edge id="67" source="Bashar_al-Assad" target="Harasta" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-11" />
+        </attvalues>
+      </edge>
+      <edge id="68" source="Bashar_al-Assad" target="Wikipedia" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-03-11" />
+        </attvalues>
+      </edge>
+      <edge id="69" source="Bashar_al-Assad" target="Al-Rastan" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-11" />
+        </attvalues>
+      </edge>
+      <edge id="70" source="Bashar_al-Assad" target="Homs" weight="5">
+        <attvalues>
+          <attvalue for="1" value="2016-04-11" />
+        </attvalues>
+      </edge>
+      <edge id="71" source="Bashar_al-Assad" target="Latakia_Governorate" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-04-26" />
+        </attvalues>
+      </edge>
+      <edge id="72" source="Bashar_al-Assad" target="Damascus" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2017-01-03" />
+        </attvalues>
+      </edge>
+      <edge id="73" source="Bashar_al-Assad" target="Daraya" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-02-23" />
+        </attvalues>
+      </edge>
+      <edge id="74" source="Bashar_al-Assad" target="Japan_Self-Defense_Forces" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-01" />
+        </attvalues>
+      </edge>
+      <edge id="75" source="Bashar_al-Assad" target="Free_Syrian_Army" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-08-21" />
+        </attvalues>
+      </edge>
+      <edge id="76" source="Bashar_al-Assad" target="Jeep" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-21" />
+        </attvalues>
+      </edge>
+      <edge id="77" source="Bashar_al-Assad" target="Al-Zabadani" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-23" />
+        </attvalues>
+      </edge>
+      <edge id="78" source="Bashar_al-Assad" target="Iraq" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-09-08" />
+        </attvalues>
+      </edge>
+      <edge id="79" source="Bashar_al-Assad" target="Iran" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-09-08" />
+        </attvalues>
+      </edge>
+      <edge id="80" source="Bashar_al-Assad" target="International_Red_Cross_and_Red_Crescent_Movement" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-26" />
+        </attvalues>
+      </edge>
+      <edge id="81" source="Bashar_al-Assad" target="Al-Ghantu" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-06-22" />
+        </attvalues>
+      </edge>
+      <edge id="82" source="Bashar_al-Assad" target="Frontline_(U.S._TV_series)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-02-25" />
+        </attvalues>
+      </edge>
+      <edge id="83" source="Bashar_al-Assad" target="Bild" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-14" />
+        </attvalues>
+      </edge>
+      <edge id="84" source="Bashar_al-Assad" target="Vladimir_Putin" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-14" />
+        </attvalues>
+      </edge>
+      <edge id="85" source="Bashar_al-Assad" target="Outrageous!" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-10" />
+        </attvalues>
+      </edge>
+      <edge id="86" source="Bashar_al-Assad" target="Palmyra" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-24" />
+        </attvalues>
+      </edge>
+      <edge id="87" source="Bashar_al-Assad" target="Israeli_Air_Force" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-05-05" />
+        </attvalues>
+      </edge>
+      <edge id="88" source="Bashar_al-Assad" target="Sarmada" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-05-05" />
+        </attvalues>
+      </edge>
+      <edge id="89" source="Bashar_al-Assad" target="Yes_(band)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-08" />
+        </attvalues>
+      </edge>
+      <edge id="90" source="Bashar_al-Assad" target="CoH_(musician)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-05-29" />
+        </attvalues>
+      </edge>
+      <edge id="91" source="Aleppo" target="Japan_Self-Defense_Forces" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-03-13" />
+        </attvalues>
+      </edge>
+      <edge id="92" source="Aleppo" target="Free_Syrian_Army" weight="3">
+        <attvalues>
+          <attvalue for="1" value="2016-02-25" />
+        </attvalues>
+      </edge>
+      <edge id="93" source="Aleppo" target="Nur,_Poland" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-07-30" />
+        </attvalues>
+      </edge>
+      <edge id="94" source="Aleppo" target="Ganz_Works" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-07-30" />
+        </attvalues>
+      </edge>
+      <edge id="95" source="Aleppo" target="Bild" weight="3">
+        <attvalues>
+          <attvalue for="1" value="2016-07-30" />
+        </attvalues>
+      </edge>
+      <edge id="96" source="Aleppo" target="Aleppo" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-07-08" />
+        </attvalues>
+      </edge>
+      <edge id="97" source="Aleppo" target="Al_Rai" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-19" />
+        </attvalues>
+      </edge>
+      <edge id="98" source="Aleppo" target="Jeep" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-21" />
+        </attvalues>
+      </edge>
+      <edge id="99" source="Aleppo" target="Daraya" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-07-30" />
+        </attvalues>
+      </edge>
+      <edge id="100" source="Aleppo" target="Homs" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-07-30" />
+        </attvalues>
+      </edge>
+      <edge id="101" source="Aleppo" target="Russian_language" weight="4">
+        <attvalues>
+          <attvalue for="1" value="2016-07-30" />
+        </attvalues>
+      </edge>
+      <edge id="102" source="Aleppo" target="Iraq" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-09-08" />
+        </attvalues>
+      </edge>
+      <edge id="103" source="Aleppo" target="Iran" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-09-08" />
+        </attvalues>
+      </edge>
+      <edge id="104" source="Aleppo" target="Wikipedia" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-29" />
+        </attvalues>
+      </edge>
+      <edge id="105" source="Aleppo" target="Guess_(clothing)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-29" />
+        </attvalues>
+      </edge>
+      <edge id="106" source="Japan_Self-Defense_Forces" target="Euphrates" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-29" />
+        </attvalues>
+      </edge>
+      <edge id="107" source="Japan_Self-Defense_Forces" target="Free_Syrian_Army" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-02-26" />
+        </attvalues>
+      </edge>
+      <edge id="108" source="Scotland" target="United_Kingdom" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-06-24" />
+        </attvalues>
+      </edge>
+      <edge id="109" source="Russian_language" target="Turkey" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-28" />
+        </attvalues>
+      </edge>
+      <edge id="110" source="Russian_language" target="Old_French" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-02-29" />
+        </attvalues>
+      </edge>
+      <edge id="111" source="Russian_language" target="German_language" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-05-07" />
+        </attvalues>
+      </edge>
+      <edge id="112" source="Russian_language" target="Russian_language" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-05-07" />
+        </attvalues>
+      </edge>
+      <edge id="113" source="Russian_language" target="Twitter" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-09-09" />
+        </attvalues>
+      </edge>
+      <edge id="114" source="Russian_language" target="Turkish_language" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-09-09" />
+        </attvalues>
+      </edge>
+      <edge id="115" source="Turkey" target="Free_Syrian_Army" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-01" />
+        </attvalues>
+      </edge>
+      <edge id="116" source="Turkey" target="Saladin" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-01" />
+        </attvalues>
+      </edge>
+      <edge id="117" source="Turkey" target="United_States" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-01" />
+        </attvalues>
+      </edge>
+      <edge id="118" source="Turkey" target="Kilis" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-22" />
+        </attvalues>
+      </edge>
+      <edge id="119" source="Turkey" target="Kurdistan_Workers'_Party" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-10-23" />
+        </attvalues>
+      </edge>
+      <edge id="120" source="Turkey" target="Turkish_Army" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-10-23" />
+        </attvalues>
+      </edge>
+      <edge id="121" source="Turkey" target="Mardin_Province" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-10-23" />
+        </attvalues>
+      </edge>
+      <edge id="122" source="BBC" target="Bild" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-30" />
+        </attvalues>
+      </edge>
+      <edge id="123" source="Bild" target="Nur,_Poland" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-07-30" />
+        </attvalues>
+      </edge>
+      <edge id="124" source="Bild" target="Ganz_Works" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-07-30" />
+        </attvalues>
+      </edge>
+      <edge id="125" source="Bild" target="Massachusetts_Institute_of_Technology" weight="3">
+        <attvalues>
+          <attvalue for="1" value="2016-07-29" />
+        </attvalues>
+      </edge>
+      <edge id="126" source="Bild" target="United_Nations" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-07-29" />
+        </attvalues>
+      </edge>
+      <edge id="127" source="Bild" target="Vladimir_Putin" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-14" />
+        </attvalues>
+      </edge>
+      <edge id="128" source="Bild" target="Germany" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-22" />
+        </attvalues>
+      </edge>
+      <edge id="129" source="Bild" target="Wissen" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-06-13" />
+        </attvalues>
+      </edge>
+      <edge id="130" source="Idlib" target="ONE_Campaign" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-11" />
+        </attvalues>
+      </edge>
+      <edge id="131" source="Idlib" target="Ariha,_Syria" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-06-02" />
+        </attvalues>
+      </edge>
+      <edge id="132" source="Idlib" target="PPL_(utility)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-06-02" />
+        </attvalues>
+      </edge>
+      <edge id="133" source="Google" target="Germany" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-06-24" />
+        </attvalues>
+      </edge>
+      <edge id="134" source="Google" target="Great_Britain" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-06-24" />
+        </attvalues>
+      </edge>
+      <edge id="135" source="Germany" target="Great_Britain" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-06-24" />
+        </attvalues>
+      </edge>
+      <edge id="136" source="Germany" target="Blindness" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-03-09" />
+        </attvalues>
+      </edge>
+      <edge id="137" source="Germany" target="Germany" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-09" />
+        </attvalues>
+      </edge>
+      <edge id="138" source="Germany" target="Massachusetts_Institute_of_Technology" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-22" />
+        </attvalues>
+      </edge>
+      <edge id="139" source="Germany" target="Dresden" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-10-04" />
+        </attvalues>
+      </edge>
+      <edge id="140" source="Germany" target="Heute" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-10-04" />
+        </attvalues>
+      </edge>
+      <edge id="141" source="Germany" target="Berlin" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-10-04" />
+        </attvalues>
+      </edge>
+      <edge id="142" source="Free_Syrian_Army" target="Jeep" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-21" />
+        </attvalues>
+      </edge>
+      <edge id="143" source="Free_Syrian_Army" target="Turkish_Army" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-05-05" />
+        </attvalues>
+      </edge>
+      <edge id="144" source="Free_Syrian_Army" target="Saladin" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-01" />
+        </attvalues>
+      </edge>
+      <edge id="145" source="Free_Syrian_Army" target="United_States" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-01" />
+        </attvalues>
+      </edge>
+      <edge id="146" source="Homs" target="Al-Rastan" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-11" />
+        </attvalues>
+      </edge>
+      <edge id="147" source="Homs" target="Daraya" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-07-30" />
+        </attvalues>
+      </edge>
+      <edge id="148" source="Homs" target="Al-Ghantu" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-06-22" />
+        </attvalues>
+      </edge>
+      <edge id="149" source="Homs" target="Israeli_Air_Force" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-31" />
+        </attvalues>
+      </edge>
+      <edge id="150" source="This_TV" target="Facebook" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-02-28" />
+        </attvalues>
+      </edge>
+      <edge id="151" source="This_TV" target="United_States" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-02-28" />
+        </attvalues>
+      </edge>
+      <edge id="152" source="Nur,_Poland" target="Ganz_Works" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-07-30" />
+        </attvalues>
+      </edge>
+      <edge id="153" source="United_States" target="Iraq" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-03-07" />
+        </attvalues>
+      </edge>
+      <edge id="154" source="United_States" target="Iran" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-07" />
+        </attvalues>
+      </edge>
+      <edge id="155" source="United_States" target="Jeep" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-07" />
+        </attvalues>
+      </edge>
+      <edge id="156" source="United_States" target="Azaz" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-05-30" />
+        </attvalues>
+      </edge>
+      <edge id="157" source="United_States" target="Saladin" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-01" />
+        </attvalues>
+      </edge>
+      <edge id="158" source="United_States" target="Facebook" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-02-28" />
+        </attvalues>
+      </edge>
+      <edge id="159" source="Kidnapped_(novel)" target="Caged" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-12" />
+        </attvalues>
+      </edge>
+      <edge id="160" source="Iraq" target="Iran" weight="4">
+        <attvalues>
+          <attvalue for="1" value="2016-02-22" />
+        </attvalues>
+      </edge>
+      <edge id="161" source="Iraq" target="Austria" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-02-22" />
+        </attvalues>
+      </edge>
+      <edge id="162" source="Iraq" target="Jeep" weight="2">
+        <attvalues>
+          <attvalue for="1" value="2016-03-07" />
+        </attvalues>
+      </edge>
+      <edge id="163" source="Iraq" target="Iraq" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-07" />
+        </attvalues>
+      </edge>
+      <edge id="164" source="Poliomyelitis" target="Daraa" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-28" />
+        </attvalues>
+      </edge>
+      <edge id="165" source="Harasta" target="Wikipedia" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-11" />
+        </attvalues>
+      </edge>
+      <edge id="166" source="Wikipedia" target="Frontline_(U.S._TV_series)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-02-25" />
+        </attvalues>
+      </edge>
+      <edge id="167" source="Wikipedia" target="Guess_(clothing)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-29" />
+        </attvalues>
+      </edge>
+      <edge id="168" source="Daraya" target="Da'el" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-10-07" />
+        </attvalues>
+      </edge>
+      <edge id="169" source="Daraya" target="Mikhail_Tal" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-10-07" />
+        </attvalues>
+      </edge>
+      <edge id="170" source="Israel_Defense_Forces" target="Israel" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-19" />
+        </attvalues>
+      </edge>
+      <edge id="171" source="Israel" target="Quneitra" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-07-20" />
+        </attvalues>
+      </edge>
+      <edge id="172" source="Massachusetts_Institute_of_Technology" target="Yandex" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-04-25" />
+        </attvalues>
+      </edge>
+      <edge id="173" source="Massachusetts_Institute_of_Technology" target="United_Nations" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-07-29" />
+        </attvalues>
+      </edge>
+      <edge id="174" source="Massachusetts_Institute_of_Technology" target="Wissen" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-06-13" />
+        </attvalues>
+      </edge>
+      <edge id="175" source="Damascus" target="Egypt" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-05-17" />
+        </attvalues>
+      </edge>
+      <edge id="176" source="Damascus" target="Qamishli" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-05-17" />
+        </attvalues>
+      </edge>
+      <edge id="177" source="Iran" target="Austria" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-02-22" />
+        </attvalues>
+      </edge>
+      <edge id="178" source="Iran" target="Jeep" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-07" />
+        </attvalues>
+      </edge>
+      <edge id="179" source="Iran" target="Kefraya" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-23" />
+        </attvalues>
+      </edge>
+      <edge id="180" source="People's_Representative_Council" target="Organization_for_Security_and_Co-operation_in_Europe" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-06-24" />
+        </attvalues>
+      </edge>
+      <edge id="181" source="Turkish_Army" target="Jarabulus" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-24" />
+        </attvalues>
+      </edge>
+      <edge id="182" source="Turkish_Army" target="Kurdistan_Workers'_Party" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-10-23" />
+        </attvalues>
+      </edge>
+      <edge id="183" source="Turkish_Army" target="Mardin_Province" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-10-23" />
+        </attvalues>
+      </edge>
+      <edge id="184" source="Twitter" target="Turkish_language" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-09-09" />
+        </attvalues>
+      </edge>
+      <edge id="185" source="Ariha,_Syria" target="PPL_(utility)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-06-02" />
+        </attvalues>
+      </edge>
+      <edge id="186" source="Atarib" target="Breach_(band)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-11" />
+        </attvalues>
+      </edge>
+      <edge id="187" source="Al-Ghantu" target="Israeli_Air_Force" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-31" />
+        </attvalues>
+      </edge>
+      <edge id="188" source="Egypt" target="Qamishli" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-05-17" />
+        </attvalues>
+      </edge>
+      <edge id="189" source="Jarabulus" target="Iceland" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-08-25" />
+        </attvalues>
+      </edge>
+      <edge id="190" source="I_Predict" target="RT_(TV_network)" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-03-15" />
+        </attvalues>
+      </edge>
+      <edge id="191" source="Israeli_Air_Force" target="Sarmada" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-05-05" />
+        </attvalues>
+      </edge>
+      <edge id="192" source="Dresden" target="Heute" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-10-04" />
+        </attvalues>
+      </edge>
+      <edge id="193" source="Dresden" target="Berlin" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-10-04" />
+        </attvalues>
+      </edge>
+      <edge id="194" source="Heute" target="Berlin" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-10-04" />
+        </attvalues>
+      </edge>
+      <edge id="195" source="Kurdistan_Workers'_Party" target="Mardin_Province" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-10-23" />
+        </attvalues>
+      </edge>
+      <edge id="196" source="Da'el" target="Mikhail_Tal" weight="1">
+        <attvalues>
+          <attvalue for="1" value="2016-10-07" />
+        </attvalues>
+      </edge>
+    </edges>
+  </graph>
+</gexf>

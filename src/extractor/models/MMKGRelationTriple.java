@@ -6,7 +6,9 @@ import edu.stanford.nlp.simple.Sentence;
 public class MMKGRelationTriple {
 	
 	RelationTriple triple;
+	String subject_concept_type;
 	String subject_concept;
+	String object_concept_type;
 	String object_concept;
 	String relation_frame;
 	Sentence sentence;
@@ -36,6 +38,14 @@ public class MMKGRelationTriple {
 		return this.object_concept;
 	}
 	
+	public String getSubjectConceptType(){
+		return this.subject_concept_type;
+	}
+
+	public String getObjectConceptType(){
+		return this.object_concept_type;
+	}
+	
 	public String getRelationFrame(){
 		return this.relation_frame;
 	}
@@ -56,5 +66,12 @@ public class MMKGRelationTriple {
 		this.object_concept = object_concept;
 	}
 	
+	public void setSubjectConceptType(String subject_concept_type){
+		this.subject_concept_type = subject_concept_type;
+	}
+
+	public void setObjectConceptType(String object_concept_type){
+		this.object_concept_type = object_concept_type;
+	}
 
 }

@@ -1,0 +1,301 @@
+{% load staticfiles %}
+<html>
+  <head>
+    <title>MMKG Relation extractor</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/AdminLTE.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/chart.css' %}" />
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+    <!-- google chart -->
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <script>
+      if ((typeof google === 'undefined') || (typeof google.visualization === 'undefined')) {
+        google.charts.load("current", {packages:["corechart", "annotationchart"]});
+      }
+    </script>
+  </head>
+  <body class="skin-blue">
+    <div id="wrapper">
+      <section class="content-header">
+        <h1>Entity Graph</h1>
+        <ol class="breadcrumb">
+          <li><a href="#"><i class="fa fa-book"></i> Elastic Search</a></li>
+          <li class="active">Entity Graph</li>
+        </ol>
+      </section>
+      <section class="content">
+        <div class="box box-solid box-default" style="width:240px; position:absolute">
+          <div class="box-header" style="height:32px">
+            <div class="box-tools pull-right">
+              <button class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+            </div>
+          </div>
+          <div class="box-body">
+            <form role="form" action="." method="get" style="display: inline">
+              <div class="row">
+                <div class="col-sm-12">
+                  <table>
+                    <tr>
+                      <td colspan="2">
+                        <select class="form-control select" name="venue">
+                          {% for d in datalist %}
+                            <option value="{{ d }}" {% if d == sfile %} selected {% endif %}>{{ d }}</option>
+                          {% endfor %}
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                        <input type="text" class="form-control" name="center" {% if scenter %} value="{{scenter}}" {% endif %} placeholder="Entity of interest" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <select class="form-control select" name="type">
+                          {% for t in typelist %}
+                            <option value="{{ t }}" {% if t == stype %} selected {% endif %}>{{ t }}</option>
+                          {% endfor %}
+                        </select>
+                      </td>
+                      <td>
+                        <select class="form-control select" name="topnum">
+                          {% for n in numlist %}
+                            <option value="{{ n }}" {% if n == stopnum %} selected {% endif %}>{{ n }}</option>
+                          {% endfor %}
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colspan="2" style="height:100px">
+                        {% for et, checked in entitytypes %}
+                          <input name="{{ et }}" type="checkbox" {% if checked %} checked {% endif %}> {{ et }}<br/>
+                        {% endfor %}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">
+                        <button class="btn btn-primary btn-form" style="width:100%" type="submit" name="draw" value="draw">Draw</button>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </form>
+            {{ error }}
+          </div>
+        </div>
+        <div class="box box-solid box-default" style="width:500px; position:absolute; right:15px">
+          <div id='chart_timeline_egraph' style="padding:0"></div>
+        </div>
+        <div id="graph_container">
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
+{% if datafile %}
+<script src="{% static 'js/d3v4.js' %}"></script>
+<script src="{% static 'js/cola.min.js' %}"></script>
+<script>
+var width = 1200,
+    height = 900;
+
+var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+var cola = cola.d3adaptor(d3)
+    .size([width, height]);
+
+var numnodes = parseInt("{{ stopnum }}");
+var mean_degree = parseFloat("{{ mean_degree }}");
+
+var outer = d3.select("#graph_container").append("svg")
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .attr("pointer-events", "all");
+
+var zoom = d3.zoom();
+outer.append('rect')
+    .attr('class', 'background')
+    .attr('width', "100%")
+    .attr('height', "100%")
+    .call(zoom.on("zoom", redraw))
+    .on("dblclick.zoom", zoomToFit);
+
+var vis = outer.append('g');
+var svg = vis.append("g");
+
+var nodeMouseDown = false;
+var nodeWidth = 30, nodeHeight = 35;
+
+function redraw(transition) {
+    // if mouse down then we are dragging not panning
+    if (nodeMouseDown) return;
+    (transition ? vis.transition() : vis)
+        .attr("transform", d3.event.transform);
+}
+
+function graphBounds() {
+    var x = Number.POSITIVE_INFINITY, X = Number.NEGATIVE_INFINITY, y = Number.POSITIVE_INFINITY, Y = Number.NEGATIVE_INFINITY;
+    nodesLayer.selectAll(".node").each(function (v) {
+        x = Math.min(x, v.x - nodeWidth / 2);
+        X = Math.max(X, v.x + nodeWidth / 2);
+        y = Math.min(y, v.y - nodeHeight / 2);
+        Y = Math.max(Y, v.y + nodeHeight / 2);
+    });
+    return { x: x, X: X, y: y, Y: Y };
+}
+
+function zoomToFit() {
+    var b = graphBounds();
+    var w = b.X - b.x, h = b.Y - b.y;
+    var cw = Number(outer.attr("width")), ch = Number(outer.attr("height"));
+    var s = Math.min(cw / w, ch / h);
+    var tx = (-b.x * s + (cw / s - w) * s / 2), ty = (-b.y * s + (ch / s - h) * s / 2);
+    zoom.translate([tx, ty]).scale(s);
+    redraw(true);
+}
+
+var viewgraph = { nodes: [], links: [] };
+d3.json("{% static datafile %}", function(error, graph) {
+    viewgraph.links = graph.links;
+    viewgraph.nodes = graph.nodes;
+    refreshViewGraph("1900-01-01", "2100-01-01");
+});
+
+function refreshViewGraph(start, end) {
+    var time_start = Date.parse(start);
+    var time_end = Date.parse(end);
+    // console.log("Start:", time_start);
+    // console.log("End:", time_end);
+    Object.keys(viewgraph.links).forEach(function (e) {
+        var d = viewgraph.links[e];
+        var time = Date.parse(d.time);
+        // console.log("edge", time);
+        if (time_start < time && time < time_end) {
+            d.color = "#666"
+        } else {
+            d.color = "#eee"
+        }
+    });
+    //console.log(viewgraph);
+    update();
+}
+
+function update() {
+  var netsize = Math.min(numnodes, viewgraph.nodes.length);
+  var edgelength = Math.max(mean_degree, 50);
+  // console.log(edgelength, netsize);
+  cola
+      .nodes(viewgraph.nodes)
+      .links(viewgraph.links)
+      .linkDistance(edgelength*200/(netsize+1))
+      // .symmetricDiffLinkLengths(50, 0.8)
+      .avoidOverlaps(true)
+      .start();
+
+  var link = svg.selectAll(".link")
+      .data(viewgraph.links);
+  link.enter().append("line")
+      .attr("class", "link")
+      .style("stroke-width", function (d) { return 10*Math.sqrt(d.value/edgelength); });
+  link.exit().remove();
+  link.style("stroke", function (d) { return color(d.url); });
+
+  var node = svg.selectAll(".node")
+      .data(viewgraph.nodes);
+  node.enter().append("circle")
+      .attr("class", "node")
+      .attr("r", function(d) { return 25; })
+      .attr("fill", function(d) { if (d.group == 0) return "#FF0000"; else return color(d.group); })
+      .call(cola.drag);
+
+  var label = svg.selectAll(".label")
+      .data(viewgraph.nodes);
+  label.enter().append("text")
+      .attr("class", "label")
+      .style("font-size", "18px")
+      .text(function (d) { return d.label; })
+      .call(cola.drag);
+
+  var eLabel = svg.selectAll(".elabel")
+      .data(viewgraph.links);
+      eLabel.enter().append("text")
+      .attr("class", "elabel")
+      .style("font-size", "12px")
+      .text(function (d) { return d.label; })
+      .call(cola.drag);
+
+  node.append("title")
+      .text(function(d) { return d.groupname; });
+  label.append("title")
+      .text(function(d) { return d.groupname; });
+  eLabel.append("title")
+      .text(function(d) { return d.url; });
+
+  cola.on("tick", function () {
+      link.attr("x1", function (d) { return d.source.x; })
+          .attr("y1", function (d) { return d.source.y; })
+          .attr("x2", function (d) { return d.target.x; })
+          .attr("y2", function (d) { return d.target.y; });
+
+      node.attr("cx", function (d) { return d.x; })
+          .attr("cy", function (d) { return d.y; });
+
+      label.attr("x", function (d) {
+              var w = this.getBBox().width;
+              return d.x - w/2; })
+           .attr("y", function (d) {
+              var h = this.getBBox().height;
+              return d.y + h/4;
+            });
+      eLabel.attr("x", function (d) {
+            if (d.target.x > d.source.x) {
+                return (d.source.x + (d.target.x - d.source.x)/2); }
+            else {
+                return (d.target.x + (d.source.x - d.target.x)/2); }
+            })
+           .attr("y", function (d) {
+            if (d.target.y > d.source.y) {
+              return (d.source.y + (d.target.y - d.source.y)/2); }
+            else {
+              return (d.target.y + (d.source.y - d.target.y)/2); }
+            });
+  });
+}
+
+
+google.charts.setOnLoadCallback(drawTimelineChart);
+function drawTimelineChart() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('date', 'Date');
+    data.addColumn('number', 'Count');
+
+    timedata = {{ timelines|safe }};
+    for(var i in timedata) {
+      data.addRow([new Date(timedata[i][0]), timedata[i][1]]);
+    }
+
+    var chart = new google.visualization.AnnotationChart(document.getElementById('chart_timeline_egraph'));
+    var options = {
+      displayAnnotations: true,
+      height: 200,
+    };
+    chart.draw(data, options);
+    refreshViewGraph("1900-01-01", "2100-01-01"); // default time range
+
+    google.visualization.events.addListener(chart, 'rangechange', function(e) {
+        var range_start = e['start'],
+            range_end = e['end'];
+        // console.log("rangechange", range_start, range_end);
+        refreshViewGraph(range_start, range_end);
+    });
+}
+
+</script>
+{% endif %}

@@ -1,0 +1,30 @@
+.chart {
+    width: 100%;
+    min-width: 750px;
+}
+
+.node {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.link {
+  stroke: #666;
+  stroke-opacity: .8;
+}
+
+.background {
+  stroke: #ddd;
+  stroke-width: 1px;
+  fill: white;
+}
+
+.links line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
