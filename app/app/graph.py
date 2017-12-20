@@ -39,7 +39,7 @@ def generate_gexf_t(ent_list, filename):
                 if G.has_edge(nodes[0]["concept"], nodes[1]["concept"]): 
                     G[nodes[0]["concept"]][nodes[1]["concept"]]['weight'] += 1 
                 else: 
-                    G.add_edge(nodes[0]["concept"], nodes[1]["concept"],\ 
+                    G.add_edge(nodes[0]["concept"], nodes[1]["concept"],
                                 weight=1, time=k.strftime("%Y-%m-%d")) 
  
     gname = "graph/{}".format(filename) 

@@ -29,6 +29,7 @@ public class Article extends Docu implements IModel{
 	private boolean bulk;
 	private List<Sentence> sentences;
 	private List<MMKGRelationTriple> triples;
+	private List<MMKGRelationTriple> canonical_triples;
 	private List<String> subjects;
 	private List<String> objects;
 	private List<String> relations;
@@ -126,6 +127,10 @@ public class Article extends Docu implements IModel{
 		return this.timestamp;
 	}
 	
+	public List<MMKGRelationTriple> getCanonicalTriples(){
+		return this.canonical_triples;
+	}
+	
 	@Override
 	public List<String> getSubjects() {
 		// TODO Auto-generated method stub
@@ -154,6 +159,10 @@ public class Article extends Docu implements IModel{
 	 * Setters
 	 * 
 	 */
+	
+	public void setCanonicalTriples(List<MMKGRelationTriple> canonical_triples){
+		this.canonical_triples = canonical_triples;
+	}
 	
 	public void setKnownEntities(List<String> known_entities){
 		this.known_entities = known_entities;

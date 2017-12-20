@@ -171,15 +171,19 @@ d3.json("{% static datafile %}", function(error, graph) {
 function refreshViewGraph(start, end) {
     var time_start = Date.parse(start);
     var time_end = Date.parse(end);
-    // console.log("Start:", time_start);
-    // console.log("End:", time_end);
+
+     console.log("Start:", start);
+     console.log("End:", end);
     Object.keys(viewgraph.links).forEach(function (e) {
         var d = viewgraph.links[e];
+        //console.log(d.time);
         var time = Date.parse(d.time);
         // console.log("edge", time);
         if (time_start < time && time < time_end) {
+            console.log(d.time);
             d.color = "#666"
         } else {
+            console.log("Diff: " + d.time);
             d.color = "#eee"
         }
     });
@@ -205,21 +209,21 @@ function update() {
       .attr("class", "link")
       .style("stroke-width", function (d) { return 10*Math.sqrt(d.value/edgelength); });
   link.exit().remove();
-  link.style("stroke", function (d) { return color(d.url); });
+  link.style("stroke", function (d) { return d.color; });
 
   var node = svg.selectAll(".node")
       .data(viewgraph.nodes);
   node.enter().append("circle")
       .attr("class", "node")
-      .attr("r", function(d) { return 25; })
-      .attr("fill", function(d) { if (d.group == 0) return "#FF0000"; else return color(d.group); })
+      .attr("r", function(d) { return 10*d.degree/mean_degree; })
+      .attr("fill", function(d) { if (d.ent_type == "subject") return "#FF0000"; else return color(d.ent_type); })
       .call(cola.drag);
 
   var label = svg.selectAll(".label")
       .data(viewgraph.nodes);
   label.enter().append("text")
       .attr("class", "label")
-      .style("font-size", "18px")
+      .style("font-size", "13px")
       .text(function (d) { return d.label; })
       .call(cola.drag);
 

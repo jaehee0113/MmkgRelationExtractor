@@ -309,6 +309,7 @@ public class AppWorker {
 		
 		List<MMKGRelationTriple> triples = article.getTriples();
 		for(MMKGRelationTriple triple: triples) {
+					
 			//Getting parts of a triple
 			String subject = triple.getTriple().subjectLemmaGloss();
 			String object = triple.getTriple().objectLemmaGloss();
@@ -399,6 +400,9 @@ public class AppWorker {
 		int onlyRelFrame = 0;
 		
 		for(MMKGRelationTriple triple: triples) {
+			
+			//Set the time for each triple
+			triple.setTimestamp(article.getTimestamp());
 			String subject = triple.getTriple().subjectLemmaGloss();
 			String object = triple.getTriple().objectLemmaGloss();
 			String relation = triple.getTriple().relationLemmaGloss();
@@ -520,6 +524,9 @@ public class AppWorker {
 
 		}
 		
+		//Store canonical triples
+		article.setCanonicalTriples(canonicalTriples);
+		
 		System.out.println("Article Title: " + article.getTitle());
 		System.out.println();
 		
@@ -580,13 +587,34 @@ public class AppWorker {
 		
 		
 		// Generate gexf file for graph rendering
+		//GexfGraph graph = new GexfGraph();
+		//graph.createGraphFromTriples(triples);
+		//graph.exportGexfGraph("uncanonized");
+		
+		//GexfGraph graph1 = new GexfGraph();
+		//graph1.createGraphFromTriples(canonicalTriples);
+		//graph1.exportGexfGraph("canonized");
+		
+	}
+	
+	public static void generateGraphFromArticles(List<Article> articles){
+		
+		List<MMKGRelationTriple> merged_triples = new ArrayList<MMKGRelationTriple>();
+		List<MMKGRelationTriple> merged_canonical_triples = new ArrayList<MMKGRelationTriple>();
+		
+		for(Article article : articles) {
+			merged_triples.addAll(article.getTriples());
+			merged_canonical_triples.addAll(article.getCanonicalTriples());
+		}
+		
 		GexfGraph graph = new GexfGraph();
-		graph.createGraphFromTriples(article.getTimestamp(),triples);
+		graph.createGraphFromTriples(merged_triples);
 		graph.exportGexfGraph("uncanonized");
 		
-		GexfGraph graph1 = new GexfGraph();
-		graph1.createGraphFromTriples(article.getTimestamp(), canonicalTriples);
-		graph1.exportGexfGraph("canonized");
+		GexfGraph graph2 = new GexfGraph();
+		graph2.createGraphFromTriples(merged_canonical_triples);
+		graph2.exportGexfGraph("canonized");
+		
 		
 	}
 	
@@ -609,6 +637,9 @@ public class AppWorker {
 		return String.join(" ", words);
 	}
 	
+	/**
+	 * @param topic Elasticsearch topic
+	 */
 	public static Map<String, Article> getArticlesFromTopic(String topic){
 		
 		Map<String, Article> articles = new HashMap<String, Article>();
@@ -666,6 +697,67 @@ public class AppWorker {
 		
 	}
 	
+	/**
+	 * @param topic Elasticsearch topic
+	 * @param start_date searches articles from this start date
+	 * @param end_date searches articles up to this end date
+	 */
+	public static Map<String, Article> getArticlesFromTopic(String topic, String start_date, String end_date){
+		
+		Map<String, Article> articles = new HashMap<String, Article>();
+		
+		SearchResponse response = ElasticController.getJSONArticlesFromIndex(topic, start_date, end_date);
+
+		SearchHit[] results = response.getHits().getHits();
+		
+		for(SearchHit hit : results) {
+			String article_id = hit.getId();
+			String source = hit.getSourceAsString();
+			try {
+				JSONObject sourceJSON = new JSONObject(source);
+				
+				String description = (String) sourceJSON.get("description");
+				
+				Article article = new Article( article_id, (String) sourceJSON.get("title"), description, true, false);
+				
+				//Populating known entities properties of an article
+				ArrayList<String> known_entities = new ArrayList<String>();
+				
+				
+				JSONArray entities = null;
+				try {
+					entities = sourceJSON.getJSONArray("entities");
+				}catch(Exception e){
+					
+				}	
+				
+				if(entities != null) {
+					for(int i = 0; i < entities.length(); i++) {
+						JSONObject obj = entities.getJSONObject(i);
+						String uri = obj.getString("uri");
+						known_entities.add(uri);
+					}		
+				}
+				
+				//Populating a timestamp of an article
+				String timestamp = (String) sourceJSON.get("timestamp");
+				Date parsedDate = DatatypeConverter.parseDateTime(timestamp).getTime();
+				article.setTimestamp(parsedDate);
+				article.setKnownEntities(known_entities);
+
+				//Finally add the article to the list
+				articles.put(article_id, article);
+				
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
+		return articles;
+		
+	}
 	
 	/*
 	 * 

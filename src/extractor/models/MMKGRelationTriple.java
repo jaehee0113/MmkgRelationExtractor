@@ -1,5 +1,7 @@
 package extractor.models;
 
+import java.util.Date;
+
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.simple.Sentence;
 
@@ -10,6 +12,7 @@ public class MMKGRelationTriple {
 	String subject_concept;
 	String object_concept_type;
 	String object_concept;
+	Date timestamp;
 	String relation_frame;
 	Sentence sentence;
 	
@@ -50,6 +53,10 @@ public class MMKGRelationTriple {
 		return this.relation_frame;
 	}
 	
+	public Date getTimestamp(){
+		return this.timestamp;
+	}
+	
 	public void setTriple(RelationTriple triple){
 		this.triple = triple;
 	}
@@ -72,6 +79,10 @@ public class MMKGRelationTriple {
 
 	public void setObjectConceptType(String object_concept_type){
 		this.object_concept_type = object_concept_type;
+	}
+	
+	public void setTimestamp(Date timestamp){
+		this.timestamp = timestamp;
 	}
 
 }
