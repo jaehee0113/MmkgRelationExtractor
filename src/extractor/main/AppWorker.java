@@ -603,8 +603,8 @@ public class AppWorker {
 		List<MMKGRelationTriple> merged_canonical_triples = new ArrayList<MMKGRelationTriple>();
 		
 		for(Article article : articles) {
-			merged_triples.addAll(article.getTriples());
-			merged_canonical_triples.addAll(article.getCanonicalTriples());
+			if(article.getTriples() != null) merged_triples.addAll(article.getTriples());
+			if(article.getCanonicalTriples() != null) merged_canonical_triples.addAll(article.getCanonicalTriples());
 		}
 		
 		GexfGraph graph = new GexfGraph();
