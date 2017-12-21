@@ -47,7 +47,19 @@ def generate_gexf_t(ent_list, filename):
     print("finish-generate_graph", filename) 
     return 
 
-def create_graph(f, center, ntype, num, checked):
+def get_num_connected_components(f):
+    G = nx.read_gexf(f)
+    return list(nx.connected_component_subgraphs(G))
+
+def load_connected_components(f, idx):
+    G = nx.read_gexf(f)
+    graphs = list(nx.connected_component_subgraphs(G))    
+    first_component = graphs[0];
+
+    for n, d in first_component.nodes(data=True):
+        print(d["label"])
+
+def create_graph(f, center, ntype, num, checked, component_idx, label_len):
     G = nx.read_gexf(f)
 
     G_nodes = []
@@ -55,6 +67,10 @@ def create_graph(f, center, ntype, num, checked):
     typenodes = []
     n_from = 0
     n_to = num
+    component_idx = int(component_idx)
+    if(component_idx != 99999):
+        connected_components = list(nx.connected_component_subgraphs(G))
+        G = connected_components[component_idx]
 
     # filter checked types
     for n, d in G.nodes(data=True):
@@ -72,19 +88,19 @@ def create_graph(f, center, ntype, num, checked):
 
     for n, d in Subgraph.nodes(data=True):
 
-        if(len(d["label"]) >= 8):
-            label = d["label"][:8] + '..'
+        if(len(d["label"]) >= label_len):
+            label = d["label"][:label_len] + '..'
         else:
             label = d["label"]
 
         node = {"name": n, "label": label, "group": d["type"]+1, "ent_type": d['entity_type'], "degree": G.degree(n)}
         if d["type"] >= len(entity_types):
-            if(len(d["label"]) >= 8):
+            if(len(d["label"]) >= label_len):
                 node["groupname"] = "Other " + "     Label: " + d["label"]
             else:
                 node["groupname"] = "Other"
         else:
-            if(len(d["label"]) >= 8):
+            if(len(d["label"]) >= label_len):
                 node["groupname"] = "Group: " + entity_types[d["type"]].split(":")[-1] + "     Label: " + d["label"]
             else:
                 node["groupname"] = entity_types[d["type"]].split(":")[-1]
@@ -98,8 +114,8 @@ def create_graph(f, center, ntype, num, checked):
     for s, t, v in Subgraph.edges(data=True):
 
 
-        if(len(v["label"]) >= 8):
-            label = v["label"][:8] + '..'
+        if(len(v["label"]) >= label_len):
+            label = v["label"][:label_len] + '..'
             url = "Frame: " + v['url'] + "      Label: " + v['label'] 
         else:
             label = v["label"]

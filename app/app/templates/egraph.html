@@ -37,7 +37,7 @@
             </div>
           </div>
           <div class="box-body">
-            <form role="form" action="." method="get" style="display: inline">
+            <form role="form" action="#" method="get" style="display: inline">
               <div class="row">
                 <div class="col-sm-12">
                   <table>
@@ -48,8 +48,26 @@
                             <option value="{{ d }}" {% if d == sfile %} selected {% endif %}>{{ d }}</option>
                           {% endfor %}
                         </select>
+
+                        {% if connected_components %}
+                        <label> *From Largest to smallest connected component </label>
+                        <select class="form-control select" name="idx">
+                            <option value="99999" selected> Show All </option>
+                            {%for i in connected_components %}
+                            <option value="{{ forloop.counter0 }}"> Component {{ forloop.counter }} </option>
+                            {% endfor %}
+                        </select>
+                        {% endif %}
                       </td>
                     </tr>
+                    {% if datalist %}
+                    <tr>
+                      <td colspan="2">
+                        <button class="btn btn-primary btn-form" style="width:100%" type="submit" name="show_connected_components" value="show_connected_components">Show connected components</button>
+                      </td>
+                    </tr>
+                    {% endif %}
+                    {% if display_rest %}
                     <tr>
                       <td colspan="2">
                         <input type="text" class="form-control" name="center" {% if scenter %} value="{{scenter}}" {% endif %} placeholder="Entity of interest" />
@@ -83,6 +101,7 @@
                         <button class="btn btn-primary btn-form" style="width:100%" type="submit" name="draw" value="draw">Draw</button>
                       </td>
                     </tr>
+                    {% endif %}
                   </table>
                 </div>
               </div>
@@ -215,7 +234,7 @@ function update() {
       .data(viewgraph.nodes);
   node.enter().append("circle")
       .attr("class", "node")
-      .attr("r", function(d) { return 7*d.degree/mean_degree; })
+      .attr("r", function(d) { return 3*d.degree/mean_degree; })
       .attr("fill", function(d) { if (d.ent_type == "subject") return "#FF0000"; else return color(d.ent_type); })
       .call(cola.drag);
 
@@ -224,6 +243,12 @@ function update() {
   label.enter().append("text")
       .attr("class", "label")
       .style("font-size", "2px")
+      .style("fill", function(d){
+        if(d.ent_type == "subject")
+          return "#101de0";
+        else
+          return "#e80d0d";
+      })
       .text(function (d) { return d.label; })
       .call(cola.drag);
 
