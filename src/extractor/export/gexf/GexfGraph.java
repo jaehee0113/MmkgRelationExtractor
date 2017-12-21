@@ -8,7 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
+import static java.nio.charset.StandardCharsets.*;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import extractor.models.MMKGRelationTriple;
 import it.uniroma1.dis.wsngroup.gexf4j.core.Edge;
@@ -69,10 +69,16 @@ public class GexfGraph {
 		
 		for (MMKGRelationTriple triple : triples) {
 			
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(triple.getTimestamp());
+			String modified_date = "";
 			
-			String modified_date = new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime());
+			if(triple.getTimestamp() != null){
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(triple.getTimestamp());
+				modified_date = new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime());	
+			}else{
+				//set the date that is easily distinguishable
+				modified_date = "2011-01-01";
+			}
 			
 			RelationTriple original_triple = triple.getTriple();
 			
@@ -96,9 +102,19 @@ public class GexfGraph {
 			if(triple.getRelationFrame() == null) rID = "rel_" + lowercased_subj_gloss + "_" + lowercased_rel_gloss + "_" + lowercased_obj_gloss;
 			else rID = "rel_" + lowercased_subj_gloss + "_" + lowercased_rel_gloss + "_" + triple.getRelationFrame().replaceAll(" ", "_").toLowerCase() + "_" + lowercased_obj_gloss;
 			
+			//encoding
+			byte[] stext = sID.getBytes(ISO_8859_1); 
+			String encoded_sID = new String(stext, UTF_8);
+			
+			byte[] otext = oID.getBytes(ISO_8859_1); 
+			String encoded_oID = new String(otext, UTF_8);
+			
+			byte[] rtext = rID.getBytes(ISO_8859_1); 
+			String encoded_rID = new String(rtext, UTF_8);
+			
 			//if that node is not available, then render
-			if(graph.getNode(sID) == null){
-				Node subject = graph.createNode(sID);
+			if(graph.getNode(encoded_sID) == null){
+				Node subject = graph.createNode(encoded_sID);
 				subject.setLabel(original_triple.subjectGloss());
 				subject.getAttributeValues().addValue(entType, "subject");
 				
@@ -114,10 +130,10 @@ public class GexfGraph {
 					subject.getAttributeValues().addValue(attUrl, "null");
 			}
 			
-			Node subject = graph.getNode(sID);
+			Node subject = graph.getNode(encoded_sID);
 			
-			if(graph.getNode(oID) == null){
-				Node object = graph.createNode(oID);
+			if(graph.getNode(encoded_oID) == null){
+				Node object = graph.createNode(encoded_oID);
 				object.setLabel(original_triple.objectGloss());
 				object.getAttributeValues().addValue(entType, "object");
 				
@@ -132,10 +148,10 @@ public class GexfGraph {
 					object.getAttributeValues().addValue(attUrl, "null");
 			}
 			
-			Node object = graph.getNode(oID);
+			Node object = graph.getNode(encoded_oID);
 			
-			if(getEdge(rID) == null && !subject.hasEdgeTo(oID)){
-				Edge relation = subject.connectTo(rID, object);
+			if(getEdge(encoded_rID) == null && !subject.hasEdgeTo(encoded_oID)){
+				Edge relation = subject.connectTo(encoded_rID, object);
 				relation.setWeight(1);
 				relation.setLabel(original_triple.relationGloss());
 				if(triple.getRelationFrame() != null)
