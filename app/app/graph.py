@@ -71,11 +71,23 @@ def create_graph(f, center, ntype, num, checked):
     Subgraph = G.subgraph(to_keep[n_from:n_to])
 
     for n, d in Subgraph.nodes(data=True):
-        node = {"name": n, "label": d["label"], "group": d["type"]+1, "ent_type": d['entity_type'], "degree": G.degree(n)}
-        if d["type"] >= len(entity_types):
-            node["groupname"] = "Other"
+
+        if(len(d["label"]) >= 8):
+            label = d["label"][:8] + '..'
         else:
-            node["groupname"] = entity_types[d["type"]].split(":")[-1],
+            label = d["label"]
+
+        node = {"name": n, "label": label, "group": d["type"]+1, "ent_type": d['entity_type'], "degree": G.degree(n)}
+        if d["type"] >= len(entity_types):
+            if(len(d["label"]) >= 8):
+                node["groupname"] = "Other " + "     Label: " + d["label"]
+            else:
+                node["groupname"] = "Other"
+        else:
+            if(len(d["label"]) >= 8):
+                node["groupname"] = "Group: " + entity_types[d["type"]].split(":")[-1] + "     Label: " + d["label"]
+            else:
+                node["groupname"] = entity_types[d["type"]].split(":")[-1]
         if n == center:
             node["group"] = 0
         if ntype > 0:
@@ -84,8 +96,17 @@ def create_graph(f, center, ntype, num, checked):
     names = [n["name"] for n in G_nodes]
 
     for s, t, v in Subgraph.edges(data=True):
+
+
+        if(len(v["label"]) >= 8):
+            label = v["label"][:8] + '..'
+            url = "Frame: " + v['url'] + "      Label: " + v['label'] 
+        else:
+            label = v["label"]
+            url = v['url']
+
         G_links.append({"source": names.index(s), "target": names.index(t),
-                        "value": v["weight"], "time": v["time"], "label": v['label'], "url": v['url']})
+                        "value": v["weight"], "time": v["time"], "label": label, "url": url})
 
     # print(G_nodes)
     # print(G_links)
