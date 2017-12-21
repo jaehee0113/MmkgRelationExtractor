@@ -6,7 +6,7 @@ from .graph import create_graph, entity_types
 cur_path = os.path.dirname(os.path.abspath(__file__))
 def main(request):
     typelist = ["full graph"]
-    numlist = [10, 20, 50, 100, 200]
+    numlist = [10, 20, 50, 100, 200, 250, 300, 400, 1000, 5000]
     datalist = ["select graph data"]
     datadir = os.path.join(cur_path, "graph")
     for f in os.listdir(datadir):
