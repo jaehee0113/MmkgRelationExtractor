@@ -43,31 +43,22 @@
                   <table>
                     <tr>
                       <td colspan="2">
-                        <select class="form-control select" name="venue">
+                        <select class="form-control select" name="venue" type="submit" onchange="this.form.submit()">
                           {% for d in datalist %}
                             <option value="{{ d }}" {% if d == sfile %} selected {% endif %}>{{ d }}</option>
                           {% endfor %}
                         </select>
-
-                        {% if connected_components %}
-                        <label> *From Largest to smallest connected component </label>
                         <select class="form-control select" name="idx">
-                            <option value="99999" selected> Show All </option>
+                            <option value="99999" {% if component_idx == None %} selected {% endif %}> Show All </option>
                             {%for i in connected_components %}
-                            <option value="{{ forloop.counter0 }}"> Component {{ forloop.counter }} </option>
+                            <option value="{{ forloop.counter0 }}" 
+                            {% if component_idx|add:"0" == forloop.counter0 %} selected {% endif %}> 
+                                Component {{ forloop.counter }} 
+                            </option>
                             {% endfor %}
                         </select>
-                        {% endif %}
                       </td>
                     </tr>
-                    {% if datalist %}
-                    <tr>
-                      <td colspan="2">
-                        <button class="btn btn-primary btn-form" style="width:100%" type="submit" name="show_connected_components" value="show_connected_components">Show connected components</button>
-                      </td>
-                    </tr>
-                    {% endif %}
-                    {% if display_rest %}
                     <tr>
                       <td colspan="2">
                         <input type="text" class="form-control" name="center" {% if scenter %} value="{{scenter}}" {% endif %} placeholder="Entity of interest" />
@@ -101,7 +92,6 @@
                         <button class="btn btn-primary btn-form" style="width:100%" type="submit" name="draw" value="draw">Draw</button>
                       </td>
                     </tr>
-                    {% endif %}
                   </table>
                 </div>
               </div>
@@ -122,6 +112,7 @@
 <script src="{% static 'js/d3v4.js' %}"></script>
 <script src="{% static 'js/cola.min.js' %}"></script>
 <script>
+
 var width = 1200,
     height = 900;
 

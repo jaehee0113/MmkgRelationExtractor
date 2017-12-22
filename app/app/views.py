@@ -4,7 +4,13 @@ from django.shortcuts import render
 from .graph import create_graph, entity_types, load_connected_components, get_num_connected_components
 
 cur_path = os.path.dirname(os.path.abspath(__file__))
+connected_components = None
+component_idx = None
+
 def main(request):
+    global connected_components
+    global component_idx
+
     typelist = ["full graph"]
     numlist = [10, 20, 50, 100, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000, 5000]
     datalist = ["select graph data"]
@@ -12,8 +18,6 @@ def main(request):
     for f in os.listdir(datadir):
         if f.endswith("gexf"):
             datalist.append(f)
-    display_rest = False
-    connected_components = None
     topnum = 50
     errormsg = ""
     component_idx = None
@@ -29,10 +33,8 @@ def main(request):
     entitytypes.append("Other")
     checked = [True for i in range(len(entitytypes))]
 
-    if "show_connected_components" in request.GET:
-        selectfile = request.GET.get("venue");
-        display_rest = True
-
+    if "venue" in request.GET:
+        selectfile = request.GET.get("venue")
         try:
             path = os.path.join(datadir, selectfile)
             if not os.path.exists(path):
@@ -50,7 +52,6 @@ def main(request):
         ntype = request.GET.get("type")
         topnum = int(request.GET.get("topnum"))
         checked = [True if request.GET.get(t) == "on" else False for t in entitytypes]
-        display_rest = True
 
         try:
             path = os.path.join(datadir, selectfile)
@@ -64,8 +65,8 @@ def main(request):
             print(errormsg)
 
     return render(request, "egraph.html", {
-                "display_rest":display_rest,
                 "connected_components": connected_components,
+                "component_idx": component_idx,
                 "error":errormsg,
                 "sfile":selectfile,
                 "scenter":center,
