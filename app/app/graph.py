@@ -49,11 +49,11 @@ def generate_gexf_t(ent_list, filename):
 
 def get_num_connected_components(f):
     G = nx.read_gexf(f)
-    return list(nx.connected_component_subgraphs(G))
+    return sorted(nx.connected_component_subgraphs(G), key=len, reverse=True)
 
 def load_connected_components(f, idx):
     G = nx.read_gexf(f)
-    graphs = list(nx.connected_component_subgraphs(G))    
+    graphs = sorted(nx.connected_component_subgraphs(G), key=len, reverse=True)
     first_component = graphs[0];
 
     for n, d in first_component.nodes(data=True):
@@ -69,7 +69,7 @@ def create_graph(f, center, ntype, num, checked, component_idx, label_len):
     n_to = num
     component_idx = int(component_idx)
     if(component_idx != 99999):
-        connected_components = list(nx.connected_component_subgraphs(G))
+        connected_components = sorted(nx.connected_component_subgraphs(G), key=len, reverse=True)
         G = connected_components[component_idx]
 
     # filter checked types
