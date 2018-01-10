@@ -1,5 +1,6 @@
 import os, json
 import networkx as nx
+import timeit
 from django.shortcuts import render
 from .graph import create_graph, entity_types, load_connected_components, get_num_connected_components
 
@@ -34,6 +35,7 @@ def main(request):
     checked = [True for i in range(len(entitytypes))]
 
     if "venue" in request.GET:
+        start = timeit.default_timer()
         selectfile = request.GET.get("venue")
         try:
             path = os.path.join(datadir, selectfile)
@@ -44,8 +46,11 @@ def main(request):
         except Exception as e:
             errormsg = e
             print(errormsg)
+        end = timeit.default_timer()
+        print end - start
 
     if "draw" in request.GET:
+        start = timeit.default_timer()
         selectfile = request.GET.get("venue")
         component_idx = request.GET.get("idx")
         center = request.GET.get("center")
@@ -63,6 +68,8 @@ def main(request):
         except Exception as e:
             errormsg = e
             print(errormsg)
+        end = timeit.default_timer()
+        print end - start
 
     return render(request, "egraph.html", {
                 "connected_components": connected_components,
