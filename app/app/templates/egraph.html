@@ -111,6 +111,7 @@
 {% if datafile %}
 <script src="{% static 'js/d3v4.js' %}"></script>
 <script src="{% static 'js/cola.min.js' %}"></script>
+<script src="{% static 'js/date.format.js' %}"></script>
 <script>
 
 var width = 1200,
@@ -182,22 +183,15 @@ function refreshViewGraph(start, end) {
     var time_start = Date.parse(start);
     var time_end = Date.parse(end);
 
-     console.log("Start:", start);
-     console.log("End:", end);
     Object.keys(viewgraph.links).forEach(function (e) {
         var d = viewgraph.links[e];
-        //console.log(d.time);
         var time = Date.parse(d.time);
-        // console.log("edge", time);
-        if (time_start < time && time < time_end) {
-            console.log(d.time);
+        if (time_start <= time && time <= time_end) {
             d.color = "#666"
         } else {
-            console.log("Diff: " + d.time);
             d.color = "#eee"
         }
     });
-    //console.log(viewgraph);
     update();
 }
 
@@ -308,6 +302,17 @@ function drawTimelineChart() {
     };
     chart.draw(data, options);
     refreshViewGraph("1900-01-01", "2100-01-01"); // default time range
+
+    function selectHandler() {
+      var selectedItem = chart.getSelection()[0];
+      if (selectedItem) {
+        var value = data.getValue(selectedItem.row, 0);
+        var date = dateFormat(new Date(value), "yyyy-mm-dd");
+        refreshViewGraph(date, date);
+      }
+    }
+
+    google.visualization.events.addListener(chart, 'select', selectHandler);
 
     google.visualization.events.addListener(chart, 'rangechange', function(e) {
         var range_start = e['start'],
