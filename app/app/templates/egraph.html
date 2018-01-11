@@ -51,9 +51,9 @@
                         <select class="form-control select" name="idx">
                             <option value="99999" {% if component_idx == None %} selected {% endif %}> Show All </option>
                             {%for i in connected_components %}
-                            <option value="{{ forloop.counter0 }}" 
-                            {% if component_idx|add:"0" == forloop.counter0 %} selected {% endif %}> 
-                                Component {{ forloop.counter }} 
+                            <option value="{{ forloop.counter0 }}"
+                            {% if component_idx|add:"0" == forloop.counter0 %} selected {% endif %}>
+                                Component {{ forloop.counter }}
                             </option>
                             {% endfor %}
                         </select>
@@ -101,6 +101,14 @@
         </div>
         <div class="box box-solid box-default" style="width:500px; position:absolute; right:15px">
           <div id='chart_timeline_egraph' style="padding:0"></div>
+          {% if nodestats %}
+          <div style="padding:3">
+            <b>Node stats</b><br/>
+            {% for name, degree in nodestats %}
+              {{ name }} {{ degree }} <br/>
+            {% endfor %}
+          </div>
+          {% endif %}
         </div>
         <div id="graph_container">
         </div>

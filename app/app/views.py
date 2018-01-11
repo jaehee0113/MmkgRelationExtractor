@@ -27,6 +27,7 @@ def main(request):
     selectfile = None
     datafile = None
     timelines = None
+    nodestats = None
     mean_degree = 1
     label_max_length = 9
 
@@ -47,7 +48,7 @@ def main(request):
             errormsg = e
             print(errormsg)
         end = timeit.default_timer()
-        print end - start
+        print(end - start)
 
     if "draw" in request.GET:
         start = timeit.default_timer()
@@ -64,12 +65,12 @@ def main(request):
                 raise Exception("Error: graph file not exists")
             f = open(path)
             #connected_components = get_num_connected_components(f)
-            datafile, mean_degree, timelines = create_graph(f, center, typelist.index(ntype), topnum, checked, component_idx, label_max_length)
+            datafile, mean_degree, timelines, nodestats = create_graph(f, center, typelist.index(ntype), topnum, checked, component_idx, label_max_length)
         except Exception as e:
             errormsg = e
             print(errormsg)
         end = timeit.default_timer()
-        print end - start
+        print(end - start)
 
     return render(request, "egraph.html", {
                 "connected_components": connected_components,
@@ -85,5 +86,6 @@ def main(request):
                 "timelines":timelines,
                 "mean_degree":mean_degree,
                 "entitytypes":zip(entitytypes,checked),
-                "datafile":datafile
+                "datafile":datafile,
+                "nodestats":nodestats
             });
