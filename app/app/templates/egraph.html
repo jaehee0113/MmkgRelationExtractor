@@ -23,6 +23,12 @@
   <body class="skin-blue">
     <div id="loading" style="display:none"></div>
     <div id="wrapper">
+      {% if datafile %}
+      <div class="slidecontainer">
+        <label> Adjust font size </label>
+        <input type="range" min="1" max="50" value="25" class="slider" id="font-range">
+      </div>
+      {% endif %}
       <section class="content-header">
         <a href="/"><h1>Entity Graph</h1></a>
         <ol class="breadcrumb">
@@ -194,6 +200,9 @@ function refreshViewGraph(start, end) {
     var time_start = Date.parse(start);
     var time_end = Date.parse(end);
 
+    var node_text_multiplier = 500 / viewgraph.nodes.length;
+    var link_text_multiplier = 500 / viewgraph.links.length;
+
     Object.keys(viewgraph.links).forEach(function (e) {
         var d = viewgraph.links[e];
         var time = Date.parse(d.time);
@@ -202,12 +211,37 @@ function refreshViewGraph(start, end) {
         } else {
             d.color = "#eee"
         }
+
+        d.font = link_text_multiplier * 2;
     });
+
+    Object.keys(viewgraph.nodes).forEach(function (e) {
+        var d = viewgraph.nodes[e];
+        d.font = node_text_multiplier * 3;
+    });
+
     update();
 }
 
+function update_font(font_size){
+  var node_label_size = font_size;
+  var link_label_size = font_size;
+  if(font_size >= 3) link_label_size = font_size - 2;
+
+  Object.keys(viewgraph.links).forEach(function (e) {
+      var d = viewgraph.links[e];
+      d.font = link_label_size;
+  });
+
+  Object.keys(viewgraph.nodes).forEach(function (e) {
+      var d = viewgraph.nodes[e];
+      d.font = node_label_size;
+  });
+
+  update();
+}
+
 function update() {
-  // Add tooltip div
   $("#loading").hide();
   var div = d3.select("body").append("div") 
     .attr("class", "tooltip")       
@@ -216,9 +250,6 @@ function update() {
   var edgelength = Math.max(mean_degree, 50);
 
   var node_text_multiplier = 500 / viewgraph.nodes.length;
-  var link_text_multiplier = 500 / viewgraph.links.length;
-  console.log("Node: " + node_text_multiplier);
-  console.log("Link: " + link_text_multiplier);
   cola
       .nodes(viewgraph.nodes)
       .links(viewgraph.links)
@@ -260,7 +291,6 @@ function update() {
       .data(viewgraph.nodes);
   label.enter().append("text")
       .attr("class", "label")
-      .style("font-size", node_text_multiplier * 3 + "px")
       .style("fill", function(d){
         if(d.ent_type == "subject")
           return "#101de0";
@@ -282,27 +312,34 @@ function update() {
         })
       .text(function (d) { return d.label; })
       .call(cola.drag);
+  label.exit().remove();
+  label.style("font-size", function(d){
+        return d.font + "px";
+      })
 
   var eLabel = svg.selectAll(".elabel")
       .data(viewgraph.links);
       eLabel.enter().append("text")
       .attr("class", "elabel")
-      .style("font-size", link_text_multiplier * 2 + "px")
-                  .on("mouseover", function(d) {    
-            div.transition()    
-                .duration(200)    
-                .style("opacity", .9);    
-            div .html(d.url)  
-                .style("left", (d3.event.pageX) + "px")   
-                .style("top", (d3.event.pageY - 28) + "px");  
-            })          
-        .on("mouseout", function(d) {   
+      .on("mouseover", function(d) {    
+      div.transition()    
+          .duration(200)    
+          .style("opacity", .9);    
+      div .html(d.url)  
+          .style("left", (d3.event.pageX) + "px")   
+          .style("top", (d3.event.pageY - 28) + "px");  
+      })          
+      .on("mouseout", function(d) {   
             div.transition()    
                 .duration(500)    
                 .style("opacity", 0); 
         })
       .text(function (d) { return d.label; })
       .call(cola.drag);
+  eLabel.exit().remove();
+  eLabel.style("font-size", function(d){
+        return d.font + "px";
+  })
 
   //node.append("title")
   //    .text(function(d) { return d.groupname; });
@@ -382,11 +419,16 @@ function drawTimelineChart() {
     });
 }
 
+$(document).ready(function(e){
+  $("#font-range").on('input',function(){
+    update_font($(this).val());
+  });
+});
 
 </script>
 {% endif %}
 <script type="text/javascript">
-  $(document).ready(function(e){
+$(document).ready(function(e){
  $("select[name='venue']").change(function(){
    $("#loading").show();
  });
