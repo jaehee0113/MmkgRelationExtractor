@@ -96,9 +96,9 @@ def create_graph(f, center, ntype, num, checked, component_idx, label_len):
         node = {"name": n, "label": label, "group": d["type"]+1, "ent_type": d['entity_type'], "degree": G.degree(n)}
         if d["type"] >= len(entity_types):
             if(len(d["label"]) >= label_len):
-                node["groupname"] = "Other " + "     Label: " + d["label"]
+                node["groupname"] = "<b>Group</b>: Other" + "&nbsp;&nbsp;&nbsp;&nbsp;<b>Label</b>: " + d["label"]
             else:
-                node["groupname"] = "Other"
+                node["groupname"] = "<b>Group</b>: Other" + "&nbsp;&nbsp;&nbsp;&nbsp;<b>Label</b>: " + d["label"]
         else:
             if(len(d["label"]) >= label_len):
                 node["groupname"] = "Group: " + entity_types[d["type"]].split(":")[-1] + "     Label: " + d["label"]
@@ -119,10 +119,10 @@ def create_graph(f, center, ntype, num, checked, component_idx, label_len):
 
         if(len(v["label"]) >= label_len):
             label = v["label"][:label_len] + '..'
-            url = "Frame: " + v['url'] + "      Label: " + v['label']
+            url = "<b>Frame</b>: " + v['url'] + "&nbsp;&nbsp;&nbsp;&nbsp;<b>Label</b>: " + v['label']
         else:
             label = v["label"]
-            url = v['url']
+            url = "<b>Frame</b>: " + v['url'] + "&nbsp;&nbsp;&nbsp;&nbsp;<b>Label</b>: " + v['label']
 
         G_links.append({"source": names.index(s), "target": names.index(t),
                         "value": v["weight"], "time": v["time"], "label": label, "url": url})

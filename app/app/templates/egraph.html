@@ -204,6 +204,13 @@ function refreshViewGraph(start, end) {
 }
 
 function update() {
+  // Add tooltip div
+var div = d3.select("body").append("div") 
+    .attr("class", "tooltip")       
+    .style("opacity", 0);
+
+
+
   var netsize = Math.min(numnodes, viewgraph.nodes.length);
   var edgelength = Math.max(mean_degree, 50);
   // console.log(edgelength, netsize);
@@ -229,6 +236,19 @@ function update() {
       .attr("class", "node")
       .attr("r", function(d) { return 3*d.degree/mean_degree; })
       .attr("fill", function(d) { if (d.ent_type == "subject") return "#FF0000"; else return color(d.ent_type); })
+      .on("mouseover", function(d) {    
+            div.transition()    
+                .duration(200)    
+                .style("opacity", .9);    
+            div .html(d.groupname)  
+                .style("left", (d3.event.pageX) + "px")   
+                .style("top", (d3.event.pageY - 28) + "px");  
+            })          
+        .on("mouseout", function(d) {   
+            div.transition()    
+                .duration(500)    
+                .style("opacity", 0); 
+        })
       .call(cola.drag);
 
   var label = svg.selectAll(".label")
@@ -242,6 +262,19 @@ function update() {
         else
           return "#e80d0d";
       })
+            .on("mouseover", function(d) {    
+            div.transition()    
+                .duration(200)    
+                .style("opacity", .9);    
+            div .html(d.groupname)  
+                .style("left", (d3.event.pageX) + "px")   
+                .style("top", (d3.event.pageY - 28) + "px");  
+            })          
+        .on("mouseout", function(d) {   
+            div.transition()    
+                .duration(500)    
+                .style("opacity", 0); 
+        })
       .text(function (d) { return d.label; })
       .call(cola.drag);
 
@@ -250,15 +283,28 @@ function update() {
       eLabel.enter().append("text")
       .attr("class", "elabel")
       .style("font-size", "2px")
+                  .on("mouseover", function(d) {    
+            div.transition()    
+                .duration(200)    
+                .style("opacity", .9);    
+            div .html(d.url)  
+                .style("left", (d3.event.pageX) + "px")   
+                .style("top", (d3.event.pageY - 28) + "px");  
+            })          
+        .on("mouseout", function(d) {   
+            div.transition()    
+                .duration(500)    
+                .style("opacity", 0); 
+        })
       .text(function (d) { return d.label; })
       .call(cola.drag);
 
-  node.append("title")
-      .text(function(d) { return d.groupname; });
-  label.append("title")
-      .text(function(d) { return d.groupname; });
-  eLabel.append("title")
-      .text(function(d) { return d.url; });
+  //node.append("title")
+  //    .text(function(d) { return d.groupname; });
+  //label.append("title")
+  //    .text(function(d) { return d.groupname; });
+  //eLabel.append("title")
+  //    .text(function(d) { return d.url; });
 
   cola.on("tick", function () {
       link.attr("x1", function (d) { return d.source.x; })
@@ -289,7 +335,11 @@ function update() {
               return (d.target.y + (d.source.y - d.target.y)/2); }
             });
   });
+
+
 }
+
+
 
 
 google.charts.setOnLoadCallback(drawTimelineChart);

@@ -28,3 +28,20 @@
   stroke: #fff;
   stroke-width: 1.5px;
 }
+
+.label{
+
+}
+
+div.tooltip { 
+    position: absolute;     
+    text-align: center;     
+    width: auto;          
+    height: auto;         
+    padding: 8px;       
+    font: 12px sans-serif;    
+    background: lightsteelblue !important; 
+    border: 0px;    
+    border-radius: 8px;     
+    pointer-events: none;     
+}
