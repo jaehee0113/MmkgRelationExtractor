@@ -28,6 +28,7 @@ def main(request):
     datafile = None
     timelines = None
     nodestats = None
+    show_components = False
     mean_degree = 1
     label_max_length = 9
 
@@ -44,6 +45,7 @@ def main(request):
                 raise Exception("Error: graph file not exists")
             f = open(path)
             connected_components = get_num_connected_components(f)
+            show_components = True
         except Exception as e:
             errormsg = e
             print(errormsg)
@@ -74,6 +76,7 @@ def main(request):
 
     return render(request, "egraph.html", {
                 "connected_components": connected_components,
+                "show_components": show_components,
                 "component_idx": component_idx,
                 "error":errormsg,
                 "sfile":selectfile,
