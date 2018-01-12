@@ -101,9 +101,9 @@ def create_graph(f, center, ntype, num, checked, component_idx, label_len):
                 node["groupname"] = "<b>Group</b>: Other" + "&nbsp;&nbsp;&nbsp;&nbsp;<b>Label</b>: " + d["label"]
         else:
             if(len(d["label"]) >= label_len):
-                node["groupname"] = "Group: " + entity_types[d["type"]].split(":")[-1] + "     Label: " + d["label"]
+                node["groupname"] = "<b>Group</b>: " + entity_types[d["type"]].split(":")[-1] + "&nbsp;&nbsp;&nbsp;&nbsp;<b>Label</b>: " + d["label"]
             else:
-                node["groupname"] = entity_types[d["type"]].split(":")[-1]
+                node["groupname"] = "<b>Group</b>: " + entity_types[d["type"]].split(":")[-1] + "&nbsp;&nbsp;&nbsp;&nbsp;<b>Label</b>: " + d["label"]
         if n == center:
             node["group"] = 0
         if ntype > 0:
