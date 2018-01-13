@@ -3,25 +3,16 @@ MMKG Relation extractor
 
 **(A part of the picturing knowledge project at the ANU Computational Media Lab)**
 
-Latest version: v1.1.1
+Latest version: v2.4.0
 Author: Jae Hee Lee
 
 The program extracts relations from multimedia sources (e.g. tweets, images, articles), which are then used for labels of the entity graph.
 
-Version History
----------------
-
-- v2.4.0 : Improvements in graph visualization (e.g. color palette for changing node color, displaing node statistics)
-- v2.3.0 : Addition of useful examples and added the functionality to see connnected components of a graph
-- v2.2.0 : Allow graph generation of multiple documents (e.g articles or tweets in a certain topic)
-- v2.1.0 : Improvements in gexf file processing speed (i.e. without calling to API, process it locally).
-- v2.0.0 : A web-based knowledge graph added
-- v1.1.0 : Added Gexf4j library thereby adding the ability to export results into gexf file for graph rendition.
-- v1.0.0 : Created basic frame of a triple extraction.
-
 
 Dependencies
 -------------
+
+**Java (triple extraction and gexf. export)**
 
 > - DBpedia Spotlight
 > - Stanford CoreNLP
@@ -31,12 +22,27 @@ Dependencies
 
 For a further details, refer to **pom.xml**.
 
+**Python (web-based knowledge graph)**
+
+> - Django
+> - Python 3
+> - NetworkX
+
+(better to create virtual environment when running manage.py in app folder)
+
 Installation Instructions
 -------------------------
+
+**Java application**
 
 > - Create a Maven project
 > - Maven build - compile
 > - Run the application with the following VM arguments: (**-Xms6g -Xmx7g**)
+
+**Python application**
+
+> - Run local server to run the application locally.
+> - Go to app folder for more detailed instruction.
 
 Application Structure
 ---------------------
@@ -72,10 +78,30 @@ This is the package where the application runs.
 Important Information
 ---------------------
 
-dfasfdssdfaasdf
+Yet to come
 
 History
 -------
+
+v 2.4
+
+> - Improvements in graph visualization (e.g. color palette for changing node color, displaing node statistics)
+
+v 2.3
+
+> - Addition of useful examples and added the functionality to see connnected components of a graph
+
+v 2.2
+
+> - Allow graph generation of multiple documents (e.g articles or tweets in a certain topic)
+
+v 2.1
+
+> - Improvements in gexf file processing speed (i.e. without calling to API, process it locally).
+
+v 2.0
+
+> - A web-based knowledge graph added
 
 v 1.1
 
