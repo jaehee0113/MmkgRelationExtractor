@@ -127,6 +127,7 @@
             {{ error }}
           </div>
         </div>
+        {% if datafile %}
         <div class="box box-solid box-default" style="width:500px; position:absolute; right:15px">
           <div class="timeline-info" style="padding:3">
             <b>Graph Timeline </b>
@@ -149,6 +150,7 @@
         </div>
         <div id="graph_container">
         </div>
+        {% endif %}
       </section>
     </div>
   </body>
