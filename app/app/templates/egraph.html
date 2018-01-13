@@ -11,7 +11,6 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
-
     <!-- google chart -->
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
@@ -24,16 +23,20 @@
     <div id="loading" style="display:none"></div>
     <div id="wrapper">
       {% if datafile %}
-      <div class="graph-legend">
-        <label> Subject Color </label>
-        <input class="jscolor" id="subj-color" value="#FF0000">
-        <label> Subject Text Color </label>
-        <input class="jscolor" id="subj-text-color" value="#101de0">
-        <label> Object Color </label>
-        <input class="jscolor" id="obj-color" value="#101de0">
-        <label> Object Text Color </label>
-        <input class="jscolor" id="obj-text-color" value="#FF0000">
+      <div class="legend-container">
+        <button class="btn btn-box-tool" id="legend-button" data-toggle="collapse" data-target=".graph-legend"><i class="fa fa-minus"></i> Legend </button>
+        <div class="graph-legend">
+          <label> Subject Color </label>
+          <input class="jscolor" id="subj-color" value="#FF0000">
+          <label> Subject Text Color </label>
+          <input class="jscolor" id="subj-text-color" value="#101de0">
+          <label> Object Color </label>
+          <input class="jscolor" id="obj-color" value="#101de0">
+          <label> Object Text Color </label>
+          <input class="jscolor" id="obj-text-color" value="#FF0000">
+        </div>
       </div>
+
       <div class="slidecontainer">
         <label> Adjust font size </label>
         <input type="range" min="1" max="50" value="25" class="slider" id="font-range">
@@ -49,8 +52,8 @@
       <section class="content">
         <div class="box box-solid box-default" style="width:240px; position:absolute">
           <div class="box-header" style="height:32px">
-            <div class="box-tools pull-right">
-              <button class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+            <div class="box-tools">
+              <button class="btn btn-box-tool" data-toggle="collapse" data-target=".box-body"><i class="fa fa-minus"></i></button>
             </div>
           </div>
           <div class="box-body">
@@ -121,11 +124,16 @@
         <div class="box box-solid box-default" style="width:500px; position:absolute; right:15px">
           <div id='chart_timeline_egraph' style="padding:0"></div>
           {% if nodestats %}
-          <div style="padding:3">
-            <b>Node stats</b><br/>
+          <div class="node-info" style="padding:3">
+            <div class="nodestats-box">
+              <b>Node stats</b>
+              <button class="btn btn-box-tool" data-toggle="collapse" data-target=".nodestats"><i class="fa fa-minus"></i></button>
+            </div>
+            <div class="nodestats">
             {% for name, degree in nodestats %}
               {{ name }} {{ degree }} <br/>
             {% endfor %}
+            </div>
           </div>
           {% endif %}
         </div>
@@ -531,4 +539,29 @@ $(document).ready(function(e){
    $("#loading").show();
  });
 });
+
+$('.box-body').on('shown.bs.collapse', function () {
+    $(this).prev().find('.fa').removeClass('fa-plus').addClass('fa-minus');
+});
+
+$('.box-body').on('hidden.bs.collapse', function () {
+     $(this).prev().find('.fa').removeClass('fa-minus').addClass('fa-plus');
+});
+
+$('.graph-legend').on('shown.bs.collapse', function () {
+    $(this).prev().find('.fa').removeClass('fa-plus').addClass('fa-minus');
+});
+
+$('.graph-legend').on('hidden.bs.collapse', function () {
+     $(this).prev().find('.fa').removeClass('fa-minus').addClass('fa-plus');
+});
+
+$('.nodestats').on('shown.bs.collapse', function () {
+    $(this).prev().find('.fa').removeClass('fa-plus').addClass('fa-minus');
+});
+
+$('.nodestats').on('hidden.bs.collapse', function () {
+    $(this).prev().find('.fa').removeClass('fa-minus').addClass('fa-plus');
+});
+
 </script>

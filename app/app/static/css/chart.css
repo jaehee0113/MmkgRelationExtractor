@@ -57,6 +57,14 @@ div.tooltip {
   left: 10;
 }
 
+#legend-button{
+  position: fixed;
+  bottom: 32;
+  left: 8;
+  background-color: white;
+  border-color: black;
+  border-radius: 6px;
+}
 
 .slidecontainer {
   position: fixed;
