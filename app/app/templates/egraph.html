@@ -39,7 +39,7 @@
 
       <div class="slidecontainer">
         <label> Adjust font size </label>
-        <input type="range" min="1" max="50" value="25" class="slider" id="font-range">
+        <input type="range" min="1" max="200" value="100" class="slider" id="font-range">
       </div>
       {% endif %}
       <section class="content-header">
@@ -52,8 +52,8 @@
       <section class="content">
         <div class="box box-solid box-default" style="width:240px; position:absolute">
           <div class="box-header" style="height:32px">
-            <div class="box-tools">
-              <label style="margin-right: 81px"> Graph Controller </label>
+            <div class="box-tools" style="top:3px !important;">
+              <label style="margin-right: 76px"> <b> Graph Controller </b> </label>
               <button class="btn btn-box-tool" data-toggle="collapse" data-target=".box-body"><i class="fa fa-minus"></i></button>
             </div>
           </div>
@@ -64,12 +64,14 @@
                   <table>
                     <tr>
                       <td colspan="2">
+                        <label style="margin-top:.5rem"><b>Select Graph</b></label>
                         <select class="form-control select" name="venue" type="submit" onchange="this.form.submit()">
                           {% for d in datalist %}
                             <option value="{{ d }}" {% if d == sfile %} selected {% endif %}>{{ d }}</option>
                           {% endfor %}
                         </select>
                         {% if show_components %}
+                        <label style="margin-top:.5rem"><b>Select Component</b></label>
                         <select class="form-control select" name="idx">
                             <option value="99999" {% if component_idx == None %} selected {% endif %}> Show All </option>
                             {%for i in connected_components %}
@@ -84,6 +86,7 @@
                     </tr>
                     <tr>
                       <td colspan="2">
+                        <label style="margin-top:.5rem"><b>Entity Options</b></label>
                         <input type="text" class="form-control" name="center" {% if scenter %} value="{{scenter}}" {% endif %} placeholder="Entity of interest" />
                       </td>
                     </tr>
@@ -105,6 +108,8 @@
                     </tr>
                     <tr>
                       <td colspan="2" style="height:100px">
+                        <label style="margin-top:.5rem"><b>Node Type Selection</b></label>
+                        <br/>
                         {% for et, checked in entitytypes %}
                           <input name="{{ et }}" type="checkbox" {% if checked %} checked {% endif %}> {{ et }}<br/>
                         {% endfor %}
@@ -123,7 +128,11 @@
           </div>
         </div>
         <div class="box box-solid box-default" style="width:500px; position:absolute; right:15px">
-          <div id='chart_timeline_egraph' style="padding:0"></div>
+          <div class="timeline-info" style="padding:3">
+            <b>Graph Timeline </b>
+            <button class="btn btn-box-tool" data-toggle="collapse" data-target=".timeline"><i class="fa fa-minus"></i></button>
+          </div>
+          <div class="timeline collapse show" id='chart_timeline_egraph' style="padding:0"></div>
           {% if nodestats %}
           <div class="node-info" style="padding:3">
             <div class="nodestats-box">
@@ -562,6 +571,14 @@ $('.nodestats').on('shown.bs.collapse', function () {
 });
 
 $('.nodestats').on('hidden.bs.collapse', function () {
+    $(this).prev().find('.fa').removeClass('fa-minus').addClass('fa-plus');
+});
+
+$('.timeline').on('shown.bs.collapse', function () {
+    $(this).prev().find('.fa').removeClass('fa-plus').addClass('fa-minus');
+});
+
+$('.timeline').on('hidden.bs.collapse', function () {
     $(this).prev().find('.fa').removeClass('fa-minus').addClass('fa-plus');
 });
 
