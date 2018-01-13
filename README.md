@@ -38,6 +38,7 @@ Installation Instructions
 > - Create a Maven project
 > - Maven build - compile
 > - Run the application with the following VM arguments: (**-Xms6g -Xmx7g**)
+> - When running the application, a local server that runs Maltperser needs to be run. Please refer to 'Important Information' section.
 
 **Python application**
 
@@ -78,7 +79,9 @@ This is the package where the application runs.
 Important Information
 ---------------------
 
-Yet to come
+**Running Maltparser**
+
+
 
 History
 -------
