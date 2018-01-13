@@ -14,8 +14,6 @@
 }
 
 .background {
-  stroke: #ddd;
-  stroke-width: 1px;
   fill: white;
 }
 
@@ -29,8 +27,8 @@
   stroke-width: 1.5px;
 }
 
-.label{
-
+.jscolor{
+  width: 63px !important;
 }
 
 div.tooltip { 
@@ -52,6 +50,13 @@ div.tooltip {
     height: 100%; 
     background: url('../images/loading.gif') no-repeat center center;
 }
+
+.graph-legend {
+  position: fixed;
+  bottom: 0;
+  left: 10;
+}
+
 
 .slidecontainer {
   position: fixed;

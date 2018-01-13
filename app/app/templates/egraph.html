@@ -24,6 +24,16 @@
     <div id="loading" style="display:none"></div>
     <div id="wrapper">
       {% if datafile %}
+      <div class="graph-legend">
+        <label> Subject Color </label>
+        <input class="jscolor" id="subj-color" value="#FF0000">
+        <label> Subject Text Color </label>
+        <input class="jscolor" id="subj-text-color" value="#101de0">
+        <label> Object Color </label>
+        <input class="jscolor" id="obj-color" value="#101de0">
+        <label> Object Text Color </label>
+        <input class="jscolor" id="obj-text-color" value="#FF0000">
+      </div>
       <div class="slidecontainer">
         <label> Adjust font size </label>
         <input type="range" min="1" max="50" value="25" class="slider" id="font-range">
@@ -129,6 +139,7 @@
 <script src="{% static 'js/d3v4.js' %}"></script>
 <script src="{% static 'js/cola.min.js' %}"></script>
 <script src="{% static 'js/date.format.js' %}"></script>
+<script src="{% static 'js/jscolor.min.js' %}"></script>
 <script>
 
 var width = 1200,
@@ -193,10 +204,10 @@ var viewgraph = { nodes: [], links: [] };
 d3.json("{% static datafile %}", function(error, graph) {
     viewgraph.links = graph.links;
     viewgraph.nodes = graph.nodes;
-    refreshViewGraph("1900-01-01", "2100-01-01");
+    initGraph("1900-01-01", "2100-01-01");
 });
 
-function refreshViewGraph(start, end) {
+function initGraph(start, end){
     var time_start = Date.parse(start);
     var time_end = Date.parse(end);
 
@@ -218,6 +229,31 @@ function refreshViewGraph(start, end) {
     Object.keys(viewgraph.nodes).forEach(function (e) {
         var d = viewgraph.nodes[e];
         d.font = node_text_multiplier * 3;
+
+        if (d.ent_type == "subject"){
+          d.node_color = "#FF0000";
+          d.node_text_color = "#101de0";
+        }else{
+          d.node_color = "#101de0";
+          d.node_text_color = "#FF0000";
+        }
+    });
+
+    update();
+}
+
+function updateTimeFrame(start, end) {
+    var time_start = Date.parse(start);
+    var time_end = Date.parse(end);
+
+    Object.keys(viewgraph.links).forEach(function (e) {
+        var d = viewgraph.links[e];
+        var time = Date.parse(d.time);
+        if (time_start <= time && time <= time_end) {
+            d.color = "#666"
+        } else {
+            d.color = "#eee"
+        }
     });
 
     update();
@@ -236,6 +272,50 @@ function update_font(font_size){
   Object.keys(viewgraph.nodes).forEach(function (e) {
       var d = viewgraph.nodes[e];
       d.font = node_label_size;
+  });
+
+  update();
+}
+
+function update_subj_color(color){
+  Object.keys(viewgraph.nodes).forEach(function (e) {
+      var d = viewgraph.nodes[e];
+      if (d.ent_type == "subject"){
+        d.node_color = "#" + color;
+      }
+  });
+
+  update();
+}
+
+function update_subj_text_color(color){
+  Object.keys(viewgraph.nodes).forEach(function (e) {
+      var d = viewgraph.nodes[e];
+      if (d.ent_type == "subject"){
+        d.node_text_color = "#" + color;
+      }
+  });
+
+  update();
+}
+
+function update_obj_color(color){
+  Object.keys(viewgraph.nodes).forEach(function (e) {
+      var d = viewgraph.nodes[e];
+      if (d.ent_type == "object"){
+        d.node_color = "#" + color;
+      }
+  });
+
+  update();
+}
+
+function update_obj_text_color(color){
+  Object.keys(viewgraph.nodes).forEach(function (e) {
+      var d = viewgraph.nodes[e];
+      if (d.ent_type == "object"){
+        d.node_text_color = "#" + color;
+      }
   });
 
   update();
@@ -271,7 +351,6 @@ function update() {
   node.enter().append("circle")
       .attr("class", "node")
       .attr("r", function(d) { return (node_text_multiplier * 3) * d.degree/mean_degree; })
-      .attr("fill", function(d) { if (d.ent_type == "subject") return "#FF0000"; else return color(d.ent_type); })
       .on("mouseover", function(d) {    
             div.transition()    
                 .duration(200)    
@@ -286,36 +365,35 @@ function update() {
                 .style("opacity", 0); 
         })
       .call(cola.drag);
+  node.exit().remove();
+  node.attr("fill", function(d) { return d.node_color; });
 
   var label = svg.selectAll(".label")
       .data(viewgraph.nodes);
   label.enter().append("text")
       .attr("class", "label")
-      .style("fill", function(d){
-        if(d.ent_type == "subject")
-          return "#101de0";
-        else
-          return "#e80d0d";
+      .on("mouseover", function(d) {    
+        div.transition()    
+            .duration(200)    
+            .style("opacity", .9);    
+        div .html(d.groupname)  
+            .style("left", (d3.event.pageX) + "px")   
+            .style("top", (d3.event.pageY - 28) + "px");  
+      })          
+      .on("mouseout", function(d) {   
+        div.transition()    
+            .duration(500)    
+            .style("opacity", 0); 
       })
-            .on("mouseover", function(d) {    
-            div.transition()    
-                .duration(200)    
-                .style("opacity", .9);    
-            div .html(d.groupname)  
-                .style("left", (d3.event.pageX) + "px")   
-                .style("top", (d3.event.pageY - 28) + "px");  
-            })          
-        .on("mouseout", function(d) {   
-            div.transition()    
-                .duration(500)    
-                .style("opacity", 0); 
-        })
       .text(function (d) { return d.label; })
       .call(cola.drag);
   label.exit().remove();
+  label.style("fill", function(d){
+        return d.node_text_color;
+      });
   label.style("font-size", function(d){
         return d.font + "px";
-      })
+      });
 
   var eLabel = svg.selectAll(".elabel")
       .data(viewgraph.links);
@@ -398,14 +476,14 @@ function drawTimelineChart() {
       height: 200,
     };
     chart.draw(data, options);
-    refreshViewGraph("1900-01-01", "2100-01-01"); // default time range
+    updateTimeFrame("1900-01-01", "2100-01-01"); // default time range
 
     function selectHandler() {
       var selectedItem = chart.getSelection()[0];
       if (selectedItem) {
         var value = data.getValue(selectedItem.row, 0);
         var date = dateFormat(new Date(value), "yyyy-mm-dd");
-        refreshViewGraph(date, date);
+        updateTimeFrame(date, date);
       }
     }
 
@@ -415,13 +493,29 @@ function drawTimelineChart() {
         var range_start = e['start'],
             range_end = e['end'];
         // console.log("rangechange", range_start, range_end);
-        refreshViewGraph(range_start, range_end);
+        updateTimeFrame(range_start, range_end);
     });
 }
 
 $(document).ready(function(e){
   $("#font-range").on('input',function(){
     update_font($(this).val());
+  });
+
+  $("#subj-color").change('input', function(){
+    update_subj_color($(this).val());
+  });
+
+  $("#subj-text-color").change('input', function(){
+    update_subj_text_color($(this).val());
+  });
+
+  $("#obj-color").change('input', function(){
+    update_obj_color($(this).val());
+  });
+
+  $("#obj-text-color").change('input', function(){
+    update_obj_text_color($(this).val());
   });
 });
 
