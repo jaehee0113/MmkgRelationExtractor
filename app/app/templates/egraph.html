@@ -24,8 +24,8 @@
     <div id="wrapper">
       {% if datafile %}
       <div class="legend-container">
-        <button class="btn btn-box-tool" id="legend-button" data-toggle="collapse" data-target=".graph-legend"><i class="fa fa-minus"></i> Legend </button>
-        <div class="graph-legend">
+        <button class="btn btn-box-tool" id="legend-button" data-toggle="collapse" data-target=".graph-legend"><i class="fa fa-plus"></i> Color Palette </button>
+        <div class="graph-legend collapse">
           <label> Subject Color </label>
           <input class="jscolor" id="subj-color" value="#FF0000">
           <label> Subject Text Color </label>
@@ -53,10 +53,11 @@
         <div class="box box-solid box-default" style="width:240px; position:absolute">
           <div class="box-header" style="height:32px">
             <div class="box-tools">
+              <label style="margin-right: 81px"> Graph Controller </label>
               <button class="btn btn-box-tool" data-toggle="collapse" data-target=".box-body"><i class="fa fa-minus"></i></button>
             </div>
           </div>
-          <div class="box-body">
+          <div class="box-body collapse show">
             <form role="form" action="#" method="get" style="display: inline">
               <div class="row">
                 <div class="col-sm-12">
@@ -127,9 +128,9 @@
           <div class="node-info" style="padding:3">
             <div class="nodestats-box">
               <b>Node stats</b>
-              <button class="btn btn-box-tool" data-toggle="collapse" data-target=".nodestats"><i class="fa fa-minus"></i></button>
+              <button class="btn btn-box-tool" data-toggle="collapse" data-target=".nodestats"><i class="fa fa-plus"></i></button>
             </div>
-            <div class="nodestats">
+            <div class="nodestats collapse">
             {% for name, degree in nodestats %}
               {{ name }} {{ degree }} <br/>
             {% endfor %}
