@@ -24,21 +24,21 @@
     <div id="wrapper">
       {% if datafile %}
       <div class="legend-container">
-        <button class="btn btn-box-tool" id="legend-button" data-toggle="collapse" data-target=".graph-legend"><i class="fa fa-plus"></i> Color Palette </button>
+        <button class="btn btn-box-tool" id="legend-button" data-toggle="collapse" data-target=".graph-legend"><i class="fa fa-plus"></i> <label style="margin-bottom:0px !important; color: black;"><b>Color Palette</b></label> </button>
         <div class="graph-legend collapse">
-          <label> Subject Color </label>
+          <label> <b> Subject Color </b> </label>
           <input class="jscolor" id="subj-color" value="#FF0000">
-          <label> Subject Text Color </label>
+          <label> <b> Subject Text Color </b> </label>
           <input class="jscolor" id="subj-text-color" value="#101de0">
-          <label> Object Color </label>
+          <label> <b> Object Color </b> </label>
           <input class="jscolor" id="obj-color" value="#101de0">
-          <label> Object Text Color </label>
+          <label> <b> Object Text Color </b> </label>
           <input class="jscolor" id="obj-text-color" value="#FF0000">
         </div>
       </div>
 
       <div class="slidecontainer">
-        <label> Adjust font size </label>
+        <label> <b> Adjust font size </b> </label>
         <input type="range" min="1" max="200" value="100" class="slider" id="font-range">
       </div>
       {% endif %}
