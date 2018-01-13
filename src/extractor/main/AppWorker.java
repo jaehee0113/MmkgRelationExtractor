@@ -35,6 +35,7 @@ import extractor.diff.DiffWorker;
 import extractor.elastic.controller.ElasticController;
 import extractor.export.gexf.GexfGraph;
 import extractor.lib.FileProcessor;
+import extractor.lib.Preprocessor;
 import extractor.models.Article;
 import extractor.models.MMKGRelationTriple;
 import extractor.dbpedia.spotlight.client.DBpediaLookupClient;
@@ -50,7 +51,10 @@ import extractor.semafor.controller.SemaforController;
 
 public class AppWorker {
 	
-	//Extracting multimedia knowledge graph as well as triples in many forms
+    /**
+     * Extracting multimedia knowledge graph as well as triples in many forms
+     * @param article the article from ElasticSearch DB.
+     */
 	public static void process(Article article){
 		
 		//First populate the triples with raw data
@@ -74,6 +78,130 @@ public class AppWorker {
 		postprocess(article);
 	}
 	
+	
+    /**
+     * Condense graph by using the triples selected based on the ranking algorithm from each sentence.
+     * @param articles the articles extracted from ElasticSearch DB.
+     */
+	public static void condense_graph(List<Article> articles, boolean allow_report){
+		
+		System.out.println("Started condensing graph ... ");
+		
+		int total_prev_triples = 0;
+		int total_triples = 0;
+		int total_sent = 0;
+		
+		for(Article article : articles){
+			
+			System.out.println("Retrieved an article...");
+			
+			List<MMKGRelationTriple> triples = article.getCanonicalTriples();
+			
+			if(triples != null){
+				total_prev_triples += triples.size();
+				
+				Map<String, List<MMKGRelationTriple>> triples_sent = new HashMap<String, List<MMKGRelationTriple>>();
+				
+				for(MMKGRelationTriple triple : triples){
+					
+					String sent = triple.getSentenceToString();
+					
+					if(triples_sent.containsKey(sent)){
+						List<MMKGRelationTriple> triple_list = triples_sent.get(sent);
+						triple_list.add(triple);
+						triples_sent.put(sent, triple_list);
+					}else{
+						List<MMKGRelationTriple> triple_list = new ArrayList<MMKGRelationTriple>();
+						triple_list.add(triple);
+						triples_sent.put(sent, triple_list);
+					}				
+					
+				}
+				
+				//Triples for each article
+				List<MMKGRelationTriple> best_triples = new ArrayList<MMKGRelationTriple>();
+				
+				for(Map.Entry<String, List<MMKGRelationTriple>> e : triples_sent.entrySet()) {				
+					List<MMKGRelationTriple> sent_triples = e.getValue();
+					//best triple per sent
+					MMKGRelationTriple best_triple = get_best_triple(sent_triples, article, articles);
+					best_triples.add(best_triple);
+					
+					if(allow_report){
+						int order = 1;
+						System.out.println();
+						System.out.println();
+						System.out.println("======================start=of=1=============================");
+						System.out.println("The best triple for the sentence: '" + e.getKey() + "' is ");
+						System.out.println("Subject Concept: " + best_triple.getSubjectConcept() + " Original: " + best_triple.getTriple().subjectGloss());
+						System.out.println("Relation: " + best_triple.getRelationFrame() + " Original: " + best_triple.getTriple().relationGloss());
+						System.out.println("Object: " + best_triple.getObjectConcept() + " Original: " + best_triple.getTriple().objectGloss());
+						System.out.println("========================end=of=1=============================");
+						System.out.println("======================start=of=2=============================");
+						System.out.println("This sentence had the following triples as confidence level of 1.0");
+						for(MMKGRelationTriple raw_triple : sent_triples){
+							System.out.println("\t Triple " + order + ": " + raw_triple.getTriple().toString());
+							order++;
+						}
+						System.out.println("=======================end=of=2=============================");
+						System.out.println();
+						System.out.println();
+					}
+				}
+				
+				//Replace with best_triples
+				article.setCanonicalTriples(best_triples);
+				
+				total_triples += best_triples.size();
+				total_sent += triples_sent.size();
+			}
+			
+		}
+		
+		System.out.println("The total number of sentences in this document is " + total_sent + "The number of triples is now " + total_triples + ". Previously the graph used to render " + total_prev_triples + " triples.");
+		
+	}
+	
+	public static MMKGRelationTriple get_best_triple(List<MMKGRelationTriple> triples_in_sent, Article curr_article, List<Article> document){
+		
+		
+		double curr_max = 0;
+		MMKGRelationTriple best_triple = null;
+		
+		for(MMKGRelationTriple triple : triples_in_sent){
+			
+			//calculate tf
+			double subject_tf = Preprocessor.get_tf(triple.getSubjectConcept(), curr_article);
+			double object_tf = Preprocessor.get_tf(triple.getObjectConcept(), curr_article);
+			double relation_tf = Preprocessor.get_tf(triple.getRelationFrame(), curr_article);
+			
+			//calculate idf
+			double subject_idf = Preprocessor.get_idf(triple.getSubjectConcept(), document);
+			double object_idf = Preprocessor.get_idf(triple.getObjectConcept(), document);
+			double relation_idf = Preprocessor.get_idf(triple.getRelationFrame(), document);
+			
+			double subject_tfidf = Preprocessor.get_tf_idf(subject_tf, subject_idf);
+			double object_tfidf = Preprocessor.get_tf_idf(object_tf, object_idf);
+			double relation_tfidf = Preprocessor.get_tf_idf(relation_tf, relation_idf);
+			
+			//calculate harmonic mean and get rank
+			double rank = 3 / ( 1/subject_tfidf + 1/object_tfidf + 1/relation_tfidf );
+			
+			if(rank >= curr_max) {
+				curr_max = rank;
+				best_triple = triple;
+			}
+			
+		}		
+		
+		return best_triple;
+		
+	}
+	
+    /**
+     * Deletes files used for processing and select triple for each sentence to reduce the number of nodes
+     * @param article the article from ElasticSearch DB.
+     */
 	public static void postprocess(Article article){
 		
 		//We do not need these files anymore (just used for preprocessing)
@@ -87,6 +215,7 @@ public class AppWorker {
 		file1.delete();
 		file2.delete();
 		file3.delete();
+		
 	}
 	
 	public static void preprocess(Article article){
@@ -309,6 +438,7 @@ public class AppWorker {
 		
 		List<MMKGRelationTriple> triples = article.getTriples();
 		for(MMKGRelationTriple triple: triples) {
+					
 			//Getting parts of a triple
 			String subject = triple.getTriple().subjectLemmaGloss();
 			String object = triple.getTriple().objectLemmaGloss();
@@ -366,6 +496,11 @@ public class AppWorker {
 		
 	}
 	
+	
+    /**
+     * Generate stat about the article and returns the canonical form of a triple
+     * @param article the article from ElasticSearch DB.
+     */
 	public static void generateTripleArticleStat(Article article) throws InterruptedException, JSONException{
 		
 		//First extract canonical form
@@ -399,6 +534,9 @@ public class AppWorker {
 		int onlyRelFrame = 0;
 		
 		for(MMKGRelationTriple triple: triples) {
+			
+			//Set the time for each triple
+			triple.setTimestamp(article.getTimestamp());
 			String subject = triple.getTriple().subjectLemmaGloss();
 			String object = triple.getTriple().objectLemmaGloss();
 			String relation = triple.getTriple().relationLemmaGloss();
@@ -520,6 +658,9 @@ public class AppWorker {
 
 		}
 		
+		//Store canonical triples
+		article.setCanonicalTriples(canonicalTriples);
+		
 		System.out.println("Article Title: " + article.getTitle());
 		System.out.println();
 		
@@ -580,13 +721,34 @@ public class AppWorker {
 		
 		
 		// Generate gexf file for graph rendering
+		//GexfGraph graph = new GexfGraph();
+		//graph.createGraphFromTriples(triples);
+		//graph.exportGexfGraph("uncanonized");
+		
+		//GexfGraph graph1 = new GexfGraph();
+		//graph1.createGraphFromTriples(canonicalTriples);
+		//graph1.exportGexfGraph("canonized");
+		
+	}
+	
+	public static void generateGraphFromArticles(List<Article> articles){
+		
+		List<MMKGRelationTriple> merged_triples = new ArrayList<MMKGRelationTriple>();
+		List<MMKGRelationTriple> merged_canonical_triples = new ArrayList<MMKGRelationTriple>();
+		
+		for(Article article : articles) {
+			if(article.getTriples() != null) merged_triples.addAll(article.getTriples());
+			if(article.getCanonicalTriples() != null) merged_canonical_triples.addAll(article.getCanonicalTriples());
+		}
+		
 		GexfGraph graph = new GexfGraph();
-		graph.createGraphFromTriples(article.getTimestamp(),triples);
+		graph.createGraphFromTriples(merged_triples);
 		graph.exportGexfGraph("uncanonized");
 		
-		GexfGraph graph1 = new GexfGraph();
-		graph1.createGraphFromTriples(article.getTimestamp(), canonicalTriples);
-		graph1.exportGexfGraph("canonized");
+		GexfGraph graph2 = new GexfGraph();
+		graph2.createGraphFromTriples(merged_canonical_triples);
+		graph2.exportGexfGraph("canonized");
+		
 		
 	}
 	
@@ -609,6 +771,9 @@ public class AppWorker {
 		return String.join(" ", words);
 	}
 	
+	/**
+	 * @param topic Elasticsearch topic
+	 */
 	public static Map<String, Article> getArticlesFromTopic(String topic){
 		
 		Map<String, Article> articles = new HashMap<String, Article>();
@@ -666,6 +831,67 @@ public class AppWorker {
 		
 	}
 	
+	/**
+	 * @param topic Elasticsearch topic
+	 * @param start_date searches articles from this start date
+	 * @param end_date searches articles up to this end date
+	 */
+	public static Map<String, Article> getArticlesFromTopic(String topic, String start_date, String end_date){
+		
+		Map<String, Article> articles = new HashMap<String, Article>();
+		
+		SearchResponse response = ElasticController.getJSONArticlesFromIndex(topic, start_date, end_date);
+
+		SearchHit[] results = response.getHits().getHits();
+		
+		for(SearchHit hit : results) {
+			String article_id = hit.getId();
+			String source = hit.getSourceAsString();
+			try {
+				JSONObject sourceJSON = new JSONObject(source);
+				
+				String description = (String) sourceJSON.get("description");
+				
+				Article article = new Article( article_id, (String) sourceJSON.get("title"), description, true, false);
+				
+				//Populating known entities properties of an article
+				ArrayList<String> known_entities = new ArrayList<String>();
+				
+				
+				JSONArray entities = null;
+				try {
+					entities = sourceJSON.getJSONArray("entities");
+				}catch(Exception e){
+					
+				}	
+				
+				if(entities != null) {
+					for(int i = 0; i < entities.length(); i++) {
+						JSONObject obj = entities.getJSONObject(i);
+						String uri = obj.getString("uri");
+						known_entities.add(uri);
+					}		
+				}
+				
+				//Populating a timestamp of an article
+				String timestamp = (String) sourceJSON.get("timestamp");
+				Date parsedDate = DatatypeConverter.parseDateTime(timestamp).getTime();
+				article.setTimestamp(parsedDate);
+				article.setKnownEntities(known_entities);
+
+				//Finally add the article to the list
+				articles.put(article_id, article);
+				
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
+		return articles;
+		
+	}
 	
 	/*
 	 * 

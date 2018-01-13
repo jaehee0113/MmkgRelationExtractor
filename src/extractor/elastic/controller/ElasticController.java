@@ -3,6 +3,7 @@ package extractor.elastic.controller;
 import java.util.Map;
 
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,6 +60,21 @@ public class ElasticController {
 		.setSize(ElasticConfig.PAGE_SIZE)
 		.setQuery(QueryBuilders.matchQuery("type", "article")).get();
 		
+	}
+	
+	public static SearchResponse getJSONArticlesFromIndex(String topic, String start_date, String end_date){
+		Map<String,String> topicDict = TopicDict.getTopicDict();
+		String index = String.format("mmkg-doc-%s", topicDict.get(topic));	
+		
+		BoolQueryBuilder query = QueryBuilders.boolQuery()
+			.filter(QueryBuilders.matchQuery("type", "article"))
+			.filter(QueryBuilders.rangeQuery("timestamp").from(start_date).to(end_date));
+		
+		return ElasticClient.getInstance().prepareSearch(index)
+		.setScroll(new TimeValue(60000))
+		.setSize(ElasticConfig.PAGE_SIZE)
+		.setQuery(query)
+		.get();
 	}
 	
 }

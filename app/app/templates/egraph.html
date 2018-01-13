@@ -11,7 +11,6 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
-
     <!-- google chart -->
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
@@ -21,9 +20,30 @@
     </script>
   </head>
   <body class="skin-blue">
+    <div id="loading" style="display:none"></div>
     <div id="wrapper">
+      {% if datafile %}
+      <div class="legend-container">
+        <button class="btn btn-box-tool" id="legend-button" data-toggle="collapse" data-target=".graph-legend"><i class="fa fa-plus"></i> <label style="margin-bottom:0px !important; color: black;"><b>Color Palette</b></label> </button>
+        <div class="graph-legend collapse">
+          <label> <b> Subject Color </b> </label>
+          <input class="jscolor" id="subj-color" value="#FF0000">
+          <label> <b> Subject Text Color </b> </label>
+          <input class="jscolor" id="subj-text-color" value="#101de0">
+          <label> <b> Object Color </b> </label>
+          <input class="jscolor" id="obj-color" value="#101de0">
+          <label> <b> Object Text Color </b> </label>
+          <input class="jscolor" id="obj-text-color" value="#FF0000">
+        </div>
+      </div>
+
+      <div class="slidecontainer">
+        <label> <b> Adjust font size </b> </label>
+        <input type="range" min="1" max="200" value="100" class="slider" id="font-range">
+      </div>
+      {% endif %}
       <section class="content-header">
-        <h1>Entity Graph</h1>
+        <a href="/"><h1>Entity Graph</h1></a>
         <ol class="breadcrumb">
           <li><a href="#"><i class="fa fa-book"></i> Elastic Search</a></li>
           <li class="active">Entity Graph</li>
@@ -32,26 +52,41 @@
       <section class="content">
         <div class="box box-solid box-default" style="width:240px; position:absolute">
           <div class="box-header" style="height:32px">
-            <div class="box-tools pull-right">
-              <button class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" title="Collapse"><i class="fa fa-minus"></i></button>
+            <div class="box-tools" style="top:3px !important;">
+              <label style="margin-right: 76px"> <b> Graph Controller </b> </label>
+              <button class="btn btn-box-tool" data-toggle="collapse" data-target=".box-body"><i class="fa fa-minus"></i></button>
             </div>
           </div>
-          <div class="box-body">
-            <form role="form" action="." method="get" style="display: inline">
+          <div class="box-body collapse show">
+            <form role="form" action="#" method="get" style="display: inline">
               <div class="row">
                 <div class="col-sm-12">
                   <table>
                     <tr>
                       <td colspan="2">
-                        <select class="form-control select" name="venue">
+                        <label style="margin-top:.5rem"><b>Select Graph</b></label>
+                        <select class="form-control select" name="venue" type="submit" onchange="this.form.submit()">
                           {% for d in datalist %}
                             <option value="{{ d }}" {% if d == sfile %} selected {% endif %}>{{ d }}</option>
                           {% endfor %}
                         </select>
+                        {% if show_components %}
+                        <label style="margin-top:.5rem"><b>Select Component</b></label>
+                        <select class="form-control select" name="idx">
+                            <option value="99999" {% if component_idx == None %} selected {% endif %}> Show All </option>
+                            {%for i in connected_components %}
+                            <option value="{{ forloop.counter0 }}"
+                            {% if component_idx|add:"0" == forloop.counter0 %} selected {% endif %}>
+                                Component {{ forloop.counter }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% endif %}
                       </td>
                     </tr>
                     <tr>
                       <td colspan="2">
+                        <label style="margin-top:.5rem"><b>Entity Options</b></label>
                         <input type="text" class="form-control" name="center" {% if scenter %} value="{{scenter}}" {% endif %} placeholder="Entity of interest" />
                       </td>
                     </tr>
@@ -73,6 +108,8 @@
                     </tr>
                     <tr>
                       <td colspan="2" style="height:100px">
+                        <label style="margin-top:.5rem"><b>Node Type Selection</b></label>
+                        <br/>
                         {% for et, checked in entitytypes %}
                           <input name="{{ et }}" type="checkbox" {% if checked %} checked {% endif %}> {{ et }}<br/>
                         {% endfor %}
@@ -90,11 +127,30 @@
             {{ error }}
           </div>
         </div>
+        {% if datafile %}
         <div class="box box-solid box-default" style="width:500px; position:absolute; right:15px">
-          <div id='chart_timeline_egraph' style="padding:0"></div>
+          <div class="timeline-info" style="padding:3">
+            <b>Graph Timeline </b>
+            <button class="btn btn-box-tool" data-toggle="collapse" data-target=".timeline"><i class="fa fa-minus"></i></button>
+          </div>
+          <div class="timeline collapse show" id='chart_timeline_egraph' style="padding:0"></div>
+          {% if nodestats %}
+          <div class="node-info" style="padding:3">
+            <div class="nodestats-box">
+              <b>Node stats</b>
+              <button class="btn btn-box-tool" data-toggle="collapse" data-target=".nodestats"><i class="fa fa-plus"></i></button>
+            </div>
+            <div class="nodestats collapse">
+            {% for name, degree in nodestats %}
+              {{ name }} {{ degree }} <br/>
+            {% endfor %}
+            </div>
+          </div>
+          {% endif %}
         </div>
         <div id="graph_container">
         </div>
+        {% endif %}
       </section>
     </div>
   </body>
@@ -102,7 +158,10 @@
 {% if datafile %}
 <script src="{% static 'js/d3v4.js' %}"></script>
 <script src="{% static 'js/cola.min.js' %}"></script>
+<script src="{% static 'js/date.format.js' %}"></script>
+<script src="{% static 'js/jscolor.min.js' %}"></script>
 <script>
+
 var width = 1200,
     height = 900;
 
@@ -165,32 +224,132 @@ var viewgraph = { nodes: [], links: [] };
 d3.json("{% static datafile %}", function(error, graph) {
     viewgraph.links = graph.links;
     viewgraph.nodes = graph.nodes;
-    refreshViewGraph("1900-01-01", "2100-01-01");
+    initGraph("1900-01-01", "2100-01-01");
 });
 
-function refreshViewGraph(start, end) {
+function initGraph(start, end){
     var time_start = Date.parse(start);
     var time_end = Date.parse(end);
-    // console.log("Start:", time_start);
-    // console.log("End:", time_end);
+
+    var node_text_multiplier = 500 / viewgraph.nodes.length;
+    var link_text_multiplier = 500 / viewgraph.links.length;
+
     Object.keys(viewgraph.links).forEach(function (e) {
         var d = viewgraph.links[e];
         var time = Date.parse(d.time);
-        // console.log("edge", time);
-        if (time_start < time && time < time_end) {
+        if (time_start <= time && time <= time_end) {
+            d.color = "#666"
+        } else {
+            d.color = "#eee"
+        }
+
+        d.font = link_text_multiplier * 2;
+    });
+
+    Object.keys(viewgraph.nodes).forEach(function (e) {
+        var d = viewgraph.nodes[e];
+        d.font = node_text_multiplier * 3;
+
+        if (d.ent_type == "subject"){
+          d.node_color = "#FF0000";
+          d.node_text_color = "#101de0";
+        }else{
+          d.node_color = "#101de0";
+          d.node_text_color = "#FF0000";
+        }
+    });
+
+    update();
+}
+
+function updateTimeFrame(start, end) {
+    var time_start = Date.parse(start);
+    var time_end = Date.parse(end);
+
+    Object.keys(viewgraph.links).forEach(function (e) {
+        var d = viewgraph.links[e];
+        var time = Date.parse(d.time);
+        if (time_start <= time && time <= time_end) {
             d.color = "#666"
         } else {
             d.color = "#eee"
         }
     });
-    //console.log(viewgraph);
+
     update();
 }
 
+function update_font(font_size){
+  var node_label_size = font_size;
+  var link_label_size = font_size;
+  if(font_size >= 3) link_label_size = font_size - 2;
+
+  Object.keys(viewgraph.links).forEach(function (e) {
+      var d = viewgraph.links[e];
+      d.font = link_label_size;
+  });
+
+  Object.keys(viewgraph.nodes).forEach(function (e) {
+      var d = viewgraph.nodes[e];
+      d.font = node_label_size;
+  });
+
+  update();
+}
+
+function update_subj_color(color){
+  Object.keys(viewgraph.nodes).forEach(function (e) {
+      var d = viewgraph.nodes[e];
+      if (d.ent_type == "subject"){
+        d.node_color = "#" + color;
+      }
+  });
+
+  update();
+}
+
+function update_subj_text_color(color){
+  Object.keys(viewgraph.nodes).forEach(function (e) {
+      var d = viewgraph.nodes[e];
+      if (d.ent_type == "subject"){
+        d.node_text_color = "#" + color;
+      }
+  });
+
+  update();
+}
+
+function update_obj_color(color){
+  Object.keys(viewgraph.nodes).forEach(function (e) {
+      var d = viewgraph.nodes[e];
+      if (d.ent_type == "object"){
+        d.node_color = "#" + color;
+      }
+  });
+
+  update();
+}
+
+function update_obj_text_color(color){
+  Object.keys(viewgraph.nodes).forEach(function (e) {
+      var d = viewgraph.nodes[e];
+      if (d.ent_type == "object"){
+        d.node_text_color = "#" + color;
+      }
+  });
+
+  update();
+}
+
 function update() {
+  $("#loading").hide();
+  var div = d3.select("body").append("div") 
+    .attr("class", "tooltip")       
+    .style("opacity", 0);
   var netsize = Math.min(numnodes, viewgraph.nodes.length);
   var edgelength = Math.max(mean_degree, 50);
-  // console.log(edgelength, netsize);
+
+  var node_text_multiplier = 500 / viewgraph.nodes.length;
   cola
       .nodes(viewgraph.nodes)
       .links(viewgraph.links)
@@ -203,40 +362,89 @@ function update() {
       .data(viewgraph.links);
   link.enter().append("line")
       .attr("class", "link")
-      .style("stroke-width", function (d) { return 10*Math.sqrt(d.value/edgelength); });
+      .style("stroke-width", function (d) { return 4*Math.sqrt(d.value/edgelength); });
   link.exit().remove();
-  link.style("stroke", function (d) { return color(d.url); });
+  link.style("stroke", function (d) { return d.color; });
 
   var node = svg.selectAll(".node")
       .data(viewgraph.nodes);
   node.enter().append("circle")
       .attr("class", "node")
-      .attr("r", function(d) { return 25; })
-      .attr("fill", function(d) { if (d.group == 0) return "#FF0000"; else return color(d.group); })
+      .attr("r", function(d) { return (node_text_multiplier * 3) * d.degree/mean_degree; })
+      .on("mouseover", function(d) {    
+            div.transition()    
+                .duration(200)    
+                .style("opacity", .9);    
+            div .html(d.groupname)  
+                .style("left", (d3.event.pageX) + "px")   
+                .style("top", (d3.event.pageY - 28) + "px");  
+            })          
+        .on("mouseout", function(d) {   
+            div.transition()    
+                .duration(500)    
+                .style("opacity", 0); 
+        })
       .call(cola.drag);
+  node.exit().remove();
+  node.attr("fill", function(d) { return d.node_color; });
 
   var label = svg.selectAll(".label")
       .data(viewgraph.nodes);
   label.enter().append("text")
       .attr("class", "label")
-      .style("font-size", "18px")
+      .on("mouseover", function(d) {    
+        div.transition()    
+            .duration(200)    
+            .style("opacity", .9);    
+        div .html(d.groupname)  
+            .style("left", (d3.event.pageX) + "px")   
+            .style("top", (d3.event.pageY - 28) + "px");  
+      })          
+      .on("mouseout", function(d) {   
+        div.transition()    
+            .duration(500)    
+            .style("opacity", 0); 
+      })
       .text(function (d) { return d.label; })
       .call(cola.drag);
+  label.exit().remove();
+  label.style("fill", function(d){
+        return d.node_text_color;
+      });
+  label.style("font-size", function(d){
+        return d.font + "px";
+      });
 
   var eLabel = svg.selectAll(".elabel")
       .data(viewgraph.links);
       eLabel.enter().append("text")
       .attr("class", "elabel")
-      .style("font-size", "12px")
+      .on("mouseover", function(d) {    
+      div.transition()    
+          .duration(200)    
+          .style("opacity", .9);    
+      div .html(d.url)  
+          .style("left", (d3.event.pageX) + "px")   
+          .style("top", (d3.event.pageY - 28) + "px");  
+      })          
+      .on("mouseout", function(d) {   
+            div.transition()    
+                .duration(500)    
+                .style("opacity", 0); 
+        })
       .text(function (d) { return d.label; })
       .call(cola.drag);
+  eLabel.exit().remove();
+  eLabel.style("font-size", function(d){
+        return d.font + "px";
+  })
 
-  node.append("title")
-      .text(function(d) { return d.groupname; });
-  label.append("title")
-      .text(function(d) { return d.groupname; });
-  eLabel.append("title")
-      .text(function(d) { return d.url; });
+  //node.append("title")
+  //    .text(function(d) { return d.groupname; });
+  //label.append("title")
+  //    .text(function(d) { return d.groupname; });
+  //eLabel.append("title")
+  //    .text(function(d) { return d.url; });
 
   cola.on("tick", function () {
       link.attr("x1", function (d) { return d.source.x; })
@@ -267,8 +475,9 @@ function update() {
               return (d.target.y + (d.source.y - d.target.y)/2); }
             });
   });
-}
 
+
+}
 
 google.charts.setOnLoadCallback(drawTimelineChart);
 function drawTimelineChart() {
@@ -287,15 +496,92 @@ function drawTimelineChart() {
       height: 200,
     };
     chart.draw(data, options);
-    refreshViewGraph("1900-01-01", "2100-01-01"); // default time range
+    updateTimeFrame("1900-01-01", "2100-01-01"); // default time range
+
+    function selectHandler() {
+      var selectedItem = chart.getSelection()[0];
+      if (selectedItem) {
+        var value = data.getValue(selectedItem.row, 0);
+        var date = dateFormat(new Date(value), "yyyy-mm-dd");
+        updateTimeFrame(date, date);
+      }
+    }
+
+    google.visualization.events.addListener(chart, 'select', selectHandler);
 
     google.visualization.events.addListener(chart, 'rangechange', function(e) {
         var range_start = e['start'],
             range_end = e['end'];
         // console.log("rangechange", range_start, range_end);
-        refreshViewGraph(range_start, range_end);
+        updateTimeFrame(range_start, range_end);
     });
 }
 
+$(document).ready(function(e){
+  $("#font-range").on('input',function(){
+    update_font($(this).val());
+  });
+
+  $("#subj-color").change('input', function(){
+    update_subj_color($(this).val());
+  });
+
+  $("#subj-text-color").change('input', function(){
+    update_subj_text_color($(this).val());
+  });
+
+  $("#obj-color").change('input', function(){
+    update_obj_color($(this).val());
+  });
+
+  $("#obj-text-color").change('input', function(){
+    update_obj_text_color($(this).val());
+  });
+});
+
 </script>
 {% endif %}
+<script type="text/javascript">
+$(document).ready(function(e){
+ $("select[name='venue']").change(function(){
+   $("#loading").show();
+ });
+
+ $("button[name='draw']").click(function(){
+   $("#loading").show();
+ });
+});
+
+$('.box-body').on('shown.bs.collapse', function () {
+    $(this).prev().find('.fa').removeClass('fa-plus').addClass('fa-minus');
+});
+
+$('.box-body').on('hidden.bs.collapse', function () {
+     $(this).prev().find('.fa').removeClass('fa-minus').addClass('fa-plus');
+});
+
+$('.graph-legend').on('shown.bs.collapse', function () {
+    $(this).prev().find('.fa').removeClass('fa-plus').addClass('fa-minus');
+});
+
+$('.graph-legend').on('hidden.bs.collapse', function () {
+     $(this).prev().find('.fa').removeClass('fa-minus').addClass('fa-plus');
+});
+
+$('.nodestats').on('shown.bs.collapse', function () {
+    $(this).prev().find('.fa').removeClass('fa-plus').addClass('fa-minus');
+});
+
+$('.nodestats').on('hidden.bs.collapse', function () {
+    $(this).prev().find('.fa').removeClass('fa-minus').addClass('fa-plus');
+});
+
+$('.timeline').on('shown.bs.collapse', function () {
+    $(this).prev().find('.fa').removeClass('fa-plus').addClass('fa-minus');
+});
+
+$('.timeline').on('hidden.bs.collapse', function () {
+    $(this).prev().find('.fa').removeClass('fa-minus').addClass('fa-plus');
+});
+
+</script>
