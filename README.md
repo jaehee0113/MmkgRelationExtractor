@@ -34,14 +34,16 @@ For a further details, refer to **pom.xml**.
 Installation Instructions
 -------------------------
 
-**Java application**
+### Java application
+
+**Make sure to examine the config files (e.g. DBpediaSpotlightConfig.java as API_URL constant will need to be changed) before running the application!**
 
 > - Create a Maven project
 > - Maven build - compile
 > - Run the application with the following VM arguments: (**-Xms8g -Xmx9g**)
-> - Before running the application, a local server that returns a frame needs to be run. Please refer to 'Important Information' section.
+> - Before running the application, a local server that returns a frame needs to be run. Please refer to 'Running SemaforSocketServer to extract frames' section.
 
-**Python application**
+### Python application
 
 > - Run local server to run the application locally.
 > - Go to app folder for more detailed instruction.
@@ -77,7 +79,7 @@ Under this package, files necessary for measuring differences or similarities be
 
 This is the package where the application runs.
 
-Important Information
+Running SemaforSocketServer to extract frames
 ---------------------
 
 Make sure to fork the repository from https://github.com/Noahs-ARK/semafor
