@@ -3,8 +3,9 @@ MMKG Relation extractor
 
 **(A part of the picturing knowledge project at the ANU Computational Media Lab)**
 
-Latest version: v2.4.0
-Author: Jae Hee Lee
+**Latest version**: v2.4.0
+
+**Author**: Jae Hee Lee
 
 The program extracts relations from multimedia sources (e.g. tweets, images, articles), which are then used for labels of the entity graph.
 
