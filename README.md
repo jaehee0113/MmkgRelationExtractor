@@ -37,8 +37,8 @@ Installation Instructions
 
 > - Create a Maven project
 > - Maven build - compile
-> - Run the application with the following VM arguments: (**-Xms6g -Xmx7g**)
-> - When running the application, a local server that runs Maltperser needs to be run. Please refer to 'Important Information' section.
+> - Run the application with the following VM arguments: (**-Xms8g -Xmx9g**)
+> - Before running the application, a local server that returns a frame needs to be run. Please refer to 'Important Information' section.
 
 **Python application**
 
@@ -79,9 +79,77 @@ This is the package where the application runs.
 Important Information
 ---------------------
 
-**Running Maltparser**
+Make sure to fork the repository from https://github.com/Noahs-ARK/semafor
 
+### Step 1. Modify files
 
+When downloaded and cloned the repository, please modify **bin/config.sh** file as follows:
+
+```sh
+# assumes this script (config.sh) lives in "${BASE_DIR}/semafor/bin/"
+export BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." > /dev/null && pwd )"
+# path to the absolute path
+# where you decompressed SEMAFOR.
+export SEMAFOR_HOME="${BASE_DIR}/semafor"
+
+export CLASSPATH=".:${SEMAFOR_HOME}/target/Semafor-3.0-alpha-04.jar"
+
+# Change the following to the bin directory of your $JAVA_HOME
+export JAVA_HOME_BIN="/usr/bin"
+
+# Change the following to the directory where you decompressed 
+# the models for SEMAFOR 2.0.
+export MALT_MODEL_DIR="../../models/semafor_malt_model_20121129"
+export MALT_ABS_MODEL_DIR="models/semafor_malt_model_20121129"
+export TURBO_MODEL_DIR="{BASE_DIR}/models/turbo_20130606"
+
+```
+
+Before running the java application you should fix the **SemaforConfig.java** file as the value is based on my local machine.
+
+```java
+//Fix the following constants
+MALT_PARSER_SHELL_DIR = "/home/admin-u4722839/Desktop/semafor/bin/runMalt.sh";
+INPUT_FILE_DIR = "/home/admin-u4722839/Documents/workspace/MmkgRelationExtractor/src/extractor/lib/files/";
+OUTPUT_DIR = "/home/admin-u4722839/Desktop/semafor/output";
+```
+
+### Step 2. Running SemaforSocketServer
+
+The basic command of running the SmeaforSocketServer local server is:
+
+```sh
+java -Xms4g -Xmx4g -cp target/Semafor-3.0-alpha-04.jar edu.cmu.cs.lti.ark.fn.SemaforSocketServer model-dir:models port:8888
+```
+
+> **! I created models folder in the main folder (the main repository folder) and created 'semafor_malt_model_20121129' folder under models folder.**
+
+> **Also make sure to have Semafor-3.0-alpha-0.4.jar inside the 'target' folder.**
+
+### Step 3. Running Maltparser
+
+When running the java application this step is automatically involved. The step is:
+
+1. The preprocessed sentences per article will be stored in a text file.
+
+2. This file (i.e. document_id-completed.txt) is then given as an input of the following command
+
+```sh
+MALT_PARSER_SHELL_DIR  SemaforConfig.INPUT_FILE_DIR (with filename) SemaforConfig.OUTPUT_DIR
+```
+
+It is possible to get an error during this stage. You will need to debug it. The parser first generates .conll file from text file and use that to extract the canonical form of a relation. The conll file will be in **/output** folder and then the following command will be executed.
+
+### Step 4. Let the server process conll file to fetch the frame for a relation.
+
+```sh
+/bin/sh -c cat /home/admin-u4722839/Desktop/semafor/output/conll | nc localhost 8888
+```
+The output will be the json files of the result for each sentence. From this result, we get the frame for each relation.
+
+**Make sure to change the directory (it is in AppWorker.java file)**
+
+Now the application should be run successfully.
 
 History
 -------
