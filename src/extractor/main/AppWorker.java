@@ -38,6 +38,7 @@ import extractor.lib.FileProcessor;
 import extractor.lib.Preprocessor;
 import extractor.models.Article;
 import extractor.models.MMKGRelationTriple;
+import extractor.models.Tweet;
 import extractor.dbpedia.spotlight.client.DBpediaLookupClient;
 import extractor.dbpedia.spotlight.client.DBpediaSpotlightClient;
 import extractor.dbpedia.spotlight.config.DBpediaSpotlightConfig;
@@ -76,6 +77,29 @@ public class AppWorker {
 		
 		//generateTripleArticleStat(article2);
 		postprocess(article);
+	}
+	
+	public static void process(Tweet tweet){
+		
+		//First populate the triples with raw data
+		tweet.populateTriples();
+		
+		//Pruning the sentence generated
+		preprocess(tweet);
+		
+		//Generates statistics about an article
+		try {
+			generateTripleTweetStat(tweet);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		//generateTripleArticleStat(article2);
+		postprocess(tweet);
 	}
 	
 	
@@ -162,6 +186,121 @@ public class AppWorker {
 		
 	}
 	
+	public static void condense_graphs(List<Tweet> tweets, boolean allow_report){
+		
+		System.out.println("Started condensing graph ... ");
+		
+		int total_prev_triples = 0;
+		int total_triples = 0;
+		int total_sent = 0;
+		
+		for(Tweet tweet : tweets){
+			
+			System.out.println("Retrieved an article...");
+			
+			List<MMKGRelationTriple> triples = tweet.getCanonicalTriples();
+			
+			if(triples != null){
+				total_prev_triples += triples.size();
+				
+				Map<String, List<MMKGRelationTriple>> triples_sent = new HashMap<String, List<MMKGRelationTriple>>();
+				
+				for(MMKGRelationTriple triple : triples){
+					
+					String sent = triple.getSentenceToString();
+					
+					if(triples_sent.containsKey(sent)){
+						List<MMKGRelationTriple> triple_list = triples_sent.get(sent);
+						triple_list.add(triple);
+						triples_sent.put(sent, triple_list);
+					}else{
+						List<MMKGRelationTriple> triple_list = new ArrayList<MMKGRelationTriple>();
+						triple_list.add(triple);
+						triples_sent.put(sent, triple_list);
+					}				
+					
+				}
+				
+				//Triples for each article
+				List<MMKGRelationTriple> best_triples = new ArrayList<MMKGRelationTriple>();
+				
+				for(Map.Entry<String, List<MMKGRelationTriple>> e : triples_sent.entrySet()) {				
+					List<MMKGRelationTriple> sent_triples = e.getValue();
+					//best triple per sent
+					MMKGRelationTriple best_triple = get_best_triple(sent_triples, tweet, tweets);
+					best_triples.add(best_triple);
+					
+					if(allow_report){
+						int order = 1;
+						System.out.println();
+						System.out.println();
+						System.out.println("======================start=of=1=============================");
+						System.out.println("The best triple for the sentence: '" + e.getKey() + "' is ");
+						System.out.println("Subject Concept: " + best_triple.getSubjectConcept() + " Original: " + best_triple.getTriple().subjectGloss());
+						System.out.println("Relation: " + best_triple.getRelationFrame() + " Original: " + best_triple.getTriple().relationGloss());
+						System.out.println("Object: " + best_triple.getObjectConcept() + " Original: " + best_triple.getTriple().objectGloss());
+						System.out.println("========================end=of=1=============================");
+						System.out.println("======================start=of=2=============================");
+						System.out.println("This sentence had the following triples as confidence level of 1.0");
+						for(MMKGRelationTriple raw_triple : sent_triples){
+							System.out.println("\t Triple " + order + ": " + raw_triple.getTriple().toString());
+							order++;
+						}
+						System.out.println("=======================end=of=2=============================");
+						System.out.println();
+						System.out.println();
+					}
+				}
+				
+				//Replace with best_triples
+				tweet.setCanonicalTriples(best_triples);
+				
+				total_triples += best_triples.size();
+				total_sent += triples_sent.size();
+			}
+			
+		}
+		
+		System.out.println("The total number of sentences in this document is " + total_sent + "The number of triples is now " + total_triples + ". Previously the graph used to render " + total_prev_triples + " triples.");
+		
+	}
+	
+	public static MMKGRelationTriple get_best_triple(List<MMKGRelationTriple> triples_in_sent, Tweet curr_article, List<Tweet> document){
+		
+		
+		double curr_max = 0;
+		MMKGRelationTriple best_triple = null;
+		
+		for(MMKGRelationTriple triple : triples_in_sent){
+			
+			//calculate tf
+			double subject_tf = Preprocessor.get_tf(triple.getSubjectConcept(), curr_article);
+			double object_tf = Preprocessor.get_tf(triple.getObjectConcept(), curr_article);
+			double relation_tf = Preprocessor.get_tf(triple.getRelationFrame(), curr_article);
+			
+			//calculate idf
+			double subject_idf = Preprocessor.get_idf(triple.getSubjectConcept(), document);
+			double object_idf = Preprocessor.get_idf(triple.getObjectConcept(), document);
+			double relation_idf = Preprocessor.get_idf(triple.getRelationFrame(), document);
+			
+			double subject_tfidf = Preprocessor.get_tf_idf(subject_tf, subject_idf);
+			double object_tfidf = Preprocessor.get_tf_idf(object_tf, object_idf);
+			double relation_tfidf = Preprocessor.get_tf_idf(relation_tf, relation_idf);
+			
+			//calculate harmonic mean and get rank
+			double rank = 3 / ( 1/subject_tfidf + 1/object_tfidf + 1/relation_tfidf );
+			
+			if(rank >= curr_max) {
+				curr_max = rank;
+				best_triple = triple;
+			}
+			
+		}		
+		
+		return best_triple;
+		
+	}
+	
 	public static MMKGRelationTriple get_best_triple(List<MMKGRelationTriple> triples_in_sent, Article curr_article, List<Article> document){
 		
 		
@@ -198,6 +337,22 @@ public class AppWorker {
 		
 	}
 	
+	public static void postprocess(Tweet tweet){
+		
+		//We do not need these files anymore (just used for preprocessing)
+		File file = new File("src/extractor/lib/files/" + tweet.getDocumentID() + ".txt");
+		File file1 = new File("src/extractor/lib/files/" + tweet.getDocumentID() + "-complete.txt");
+		File file2 = new File("src/extractor/lib/files/" + tweet.getDocumentID() + "-pruned.txt");
+		File file3 = new File("src/extractor/lib/files/" + tweet.getDocumentID() + "-completed.txt");
+
+		
+		file.delete();
+		file1.delete();
+		file2.delete();
+		file3.delete();
+		
+	}
+	
     /**
      * Deletes files used for processing and select triple for each sentence to reduce the number of nodes
      * @param article the article from ElasticSearch DB.
@@ -218,9 +373,75 @@ public class AppWorker {
 		
 	}
 	
+	public static void preprocess(Tweet tweet){
+		try {
+			List<String> sentences = FileProcessor.getSentencesFromDocument(tweet);
+			FileProcessor.writeFile(sentences, tweet.getDocumentID());
+			
+			//Remove empty lines
+			BufferedReader br = new BufferedReader(new FileReader("src/extractor/lib/files/" + tweet.getDocumentID() + ".txt"));
+			PrintWriter outputFile = new PrintWriter(new FileWriter("src/extractor/lib/files/" + tweet.getDocumentID() + "-pruned.txt"));
+			
+			String line = null;
+			while((line = br.readLine()) != null) {
+				if("".equals(line.trim())){
+					continue;
+				}
+				outputFile.println(line);
+				outputFile.flush();
+			}
+			
+			br.close();
+			outputFile.close();
+			
+			// . if the end of line does not end with it.
+			PrintWriter outputFile2 = new PrintWriter(new FileWriter("src/extractor/lib/files/" + tweet.getDocumentID() + "-complete.txt"));
+			BufferedReader br2 = new BufferedReader(new FileReader("src/extractor/lib/files/" + tweet.getDocumentID() + "-pruned.txt"));
+			String line2 = null;
+			while((line2 = br2.readLine()) != null) {
+				
+				if(line2.charAt(line2.length() - 1) != '.'){
+					outputFile2.println(line2 + ".");
+					outputFile2.flush();
+				}else{
+					outputFile2.println(line2);
+					outputFile2.flush();
+				}
+			}
+			br2.close();
+			outputFile2.close();
+			
+			//Remove duplicate lines
+			BufferedReader br3 = new BufferedReader(new FileReader("src/extractor/lib/files/" + tweet.getDocumentID() + "-complete.txt"));
+			Set<String> lines = new HashSet<String>(10000);
+			String line5;
+			while ((line5 = br3.readLine()) != null) {
+				lines.add(line5);
+			}
+			
+			br3.close();
+			
+			BufferedWriter outputFile3 = new BufferedWriter(new FileWriter("src/extractor/lib/files/" + tweet.getDocumentID() + "-completed.txt"));
+			for (String unique : lines) {
+			   outputFile3.write(unique);
+			   outputFile3.newLine();
+			}
+			   
+			outputFile3.close();
+			
+			tweet.populateTriplesFromFile();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	}
+	
 	public static void preprocess(Article article){
 		try {
-			List<String> sentences = FileProcessor.getSentencesFromArticle(article);
+			List<String> sentences = FileProcessor.getSentencesFromDocument(article);
 			FileProcessor.writeFile(sentences, article.getDocumentID());
 			
 			//Remove empty lines
@@ -348,6 +569,75 @@ public class AppWorker {
 		return null;
 	}
 	
+	public static Map<String, String> getFrames(Tweet tweet) throws InterruptedException, JSONException{
+		Map<String, String> relation_frame = new HashMap<String,String>();
+		Runtime rt = Runtime.getRuntime();
+		
+		try {
+			
+			Process pr = rt.exec( SemaforConfig.MALT_PARSER_SHELL_DIR + " " + SemaforConfig.INPUT_FILE_DIR + tweet.getDocumentID() + "-completed.txt" + " " + SemaforConfig.OUTPUT_DIR);
+			BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			 
+            String line=null;
+
+            while((line=input.readLine()) != null) {
+                System.out.println(line);
+            }
+
+            int exitVal = pr.waitFor();
+            System.out.println("Exited with error code " + exitVal);
+            
+            if(exitVal == 1) {
+            	
+	            BufferedReader errinput = new BufferedReader(new InputStreamReader(
+	            		pr.getErrorStream()));
+	            String line2 =null;
+	
+	            while((line2 = errinput.readLine()) != null) {
+	                System.out.println(line2);
+	            }
+            
+            }
+            
+            if(exitVal == 0) {
+    			String[] cmd2 = {
+    					"/bin/sh",
+    					"-c",
+    					"cat /home/admin-u4722839/Desktop/semafor/output/conll | nc localhost 8888"
+    			};
+    			
+    			
+    			pr = rt.exec(cmd2);
+                BufferedReader input2 = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+                String line2 =null;
+               
+                while((line2 = input2.readLine()) != null) {
+                	
+                	JSONObject result = new JSONObject(line2);
+                	JSONArray frames = result.getJSONArray("frames");
+                	
+    				for(int j = 0; j < frames.length(); j++){
+    					JSONObject frame = frames.getJSONObject(j);
+    					JSONArray spans = frame.getJSONObject("target").getJSONArray("spans");
+    					JSONObject text_object = spans.getJSONObject(0);
+    					String text = text_object.getString("text");
+    					String name = frame.getJSONObject("target").getString("name");
+    					//System.out.println("Text: " + text + " Frame: " + name);
+    					relation_frame.put(text,name);
+    				}
+ 
+                }
+                
+            }
+		
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return relation_frame;
+	}
+	
 	public static Map<String, String> getFrames(Article article) throws InterruptedException, JSONException{
 		Map<String, String> relation_frame = new HashMap<String,String>();
 		Runtime rt = Runtime.getRuntime();
@@ -432,6 +722,57 @@ public class AppWorker {
 		return null;
 	}
 	
+	public static void extractCanonicalForm(Tweet tweet) throws InterruptedException, JSONException{
+		
+		Map<String,String> relation_frames = getFrames(tweet);
+		
+		List<MMKGRelationTriple> triples = tweet.getTriples();
+		for(MMKGRelationTriple triple: triples) {
+					
+			//Getting parts of a triple
+			String subject = triple.getTriple().subjectLemmaGloss();
+			String object = triple.getTriple().objectLemmaGloss();
+			String relation = triple.getTriple().relationGloss();
+			
+			List<String> subject_concept_details = extractConceptFromDBP(subject, triple.getSentenceToString());
+			List<String> object_concept_details = extractConceptFromDBP(object, triple.getSentenceToString());
+						
+			if(subject_concept_details != null){
+				String subject_concept = subject_concept_details.get(0);
+				String subject_concept_types = subject_concept_details.get(1);	
+				
+				
+				List<String> subject_concept_types_list = new ArrayList<String>(Arrays.asList(subject_concept_types.split(",")));
+				String subject_concept_type = getConceptType(subject_concept_types_list);
+				
+				triple.setSubjectConcept(subject_concept);
+				triple.setSubjectConceptType(subject_concept_type);
+			}
+			
+			if(object_concept_details != null){
+				String object_concept = object_concept_details.get(0);
+				String object_concept_types = object_concept_details.get(1);
+				
+				List<String> object_concept_types_list = new ArrayList<String>(Arrays.asList(object_concept_types.split(",")));
+				String object_concept_type = getConceptType(object_concept_types_list);
+				
+				triple.setObjectConcept(object_concept);
+				triple.setObjectConceptType(object_concept_type);
+			}
+			
+			//Finding frame for the relation
+			for (Map.Entry<String, String> e : relation_frames.entrySet()) {
+				if(relation.contains(e.getKey())){
+					//System.out.println("Text: " + e.getKey() + " Frame: " + e.getValue());
+					//Store in MMKGRelationTriple object
+					triple.setRelationFrame(e.getValue());
+				}
+			}
+
+		}
+	}
+	
+	
 	public static void extractCanonicalForm(Article article) throws InterruptedException, JSONException{
 		
 		Map<String,String> relation_frames = getFrames(article);
@@ -493,6 +834,237 @@ public class AppWorker {
 		}
 		
 		return "99";
+		
+	}
+	
+	/**
+     * Generate stat about the article and returns the canonical form of a triple
+     * @param article the article from ElasticSearch DB.
+     */
+	public static void generateTripleTweetStat(Tweet tweet) throws InterruptedException, JSONException{
+		
+		//First extract canonical form
+		extractCanonicalForm(tweet);
+		
+		//Then get triples
+		List<MMKGRelationTriple> triples = tweet.getTriples();
+		
+		Map<String, List<String>> subject_only = new HashMap<String, List<String>>();
+		Map<String, List<String>> object_only = new HashMap<String, List<String>>();
+		Map<String, List<String>> rel_frame_only = new HashMap<String, List<String>>();
+		Map<String, List<String>> rel_frame_subject_only = new HashMap<String, List<String>>();
+		Map<String, List<String>> rel_frame_object_only = new HashMap<String, List<String>>();
+		Map<String, List<String>> both = new HashMap<String, List<String>>();
+		Map<String, List<String>> none = new HashMap<String, List<String>>();
+		Map<String, List<String>> all = new HashMap<String, List<String>>();
+		
+		//Triples in canonical form
+		List<MMKGRelationTriple> canonicalTriples = new ArrayList<MMKGRelationTriple>();
+		
+		//Generate Report
+		
+		int matchingPair = 0;
+		int subonlyPair = 0;
+		int objonlyPair = 0;
+		int objonlyWithFramePair = 0;
+		int subonlyWithFramePair = 0;
+		int nonmatchingPair = 0;
+		int relFrameMatch = 0;
+		int allPair = 0;
+		int onlyRelFrame = 0;
+		
+		for(MMKGRelationTriple triple: triples) {
+			
+			//Set the time for each triple
+			triple.setTimestamp(tweet.getTimestamp());
+			String subject = triple.getTriple().subjectLemmaGloss();
+			String object = triple.getTriple().objectLemmaGloss();
+			String relation = triple.getTriple().relationLemmaGloss();
+			String relation_frame = triple.getRelationFrame();
+			String subj_concept = triple.getSubjectConcept();
+			String obj_concept = triple.getObjectConcept();
+			
+			boolean subjectAvailable = false;
+			boolean objectAvailable = false;
+			boolean relFrameAvailable = false;
+
+			if(subj_concept != null) subjectAvailable = true;
+			if(obj_concept != null) objectAvailable = true;
+			
+			String result = "(" + subject + "," + relation + "," + object + ")" + " Canonical form: (" + subj_concept + "," + obj_concept + ")";
+
+			if(relation_frame != null) {
+				relFrameAvailable = true;
+				relFrameMatch++;
+				result = "(" + subject + "," + relation + "," + object + ")" + " Canonical form: (" + subj_concept + "," + relation_frame + "," + obj_concept + ")";	
+			}
+			
+			if(!relFrameAvailable && subjectAvailable && objectAvailable){
+				++matchingPair;
+				
+				if(both.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = both.get(triple.getSentenceToString());
+					curr_list.add(result);
+					both.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					both.put(triple.getSentenceToString(), new_list);
+				}
+				
+			}else if(!relFrameAvailable && subjectAvailable && !objectAvailable){
+				
+				++subonlyPair;
+				if(subject_only.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = subject_only.get(triple.getSentenceToString());
+					curr_list.add(result);
+					subject_only.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					subject_only.put(triple.getSentenceToString(), new_list);
+				}
+				
+			}else if(!relFrameAvailable && !subjectAvailable && objectAvailable){
+				++objonlyPair;
+				if(object_only.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = object_only.get(triple.getSentenceToString());
+					curr_list.add(result);
+					object_only.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					object_only.put(triple.getSentenceToString(), new_list);
+				}
+			}else if(!relFrameAvailable && !subjectAvailable && !objectAvailable) {
+				++nonmatchingPair;
+				if(none.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = none.get(triple.getSentenceToString());
+					curr_list.add(result);
+					none.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					none.put(triple.getSentenceToString(), new_list);
+				}
+				
+			}else if(relFrameAvailable && !subjectAvailable && objectAvailable){
+				++subonlyWithFramePair;
+				if(rel_frame_subject_only.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = rel_frame_subject_only.get(triple.getSentenceToString());
+					curr_list.add(result);
+					rel_frame_subject_only.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					rel_frame_subject_only.put(triple.getSentenceToString(), new_list);
+				}
+			}else if(relFrameAvailable && subjectAvailable && !objectAvailable) {
+				++objonlyWithFramePair;
+				if(rel_frame_object_only.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = rel_frame_object_only.get(triple.getSentenceToString());
+					curr_list.add(result);
+					rel_frame_object_only.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					rel_frame_object_only.put(triple.getSentenceToString(), new_list);
+				}
+			}else if(subjectAvailable && objectAvailable && relFrameAvailable){
+				allPair++;
+				canonicalTriples.add(triple);
+				if(all.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = all.get(triple.getSentenceToString());
+					curr_list.add(result);
+					all.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					all.put(triple.getSentenceToString(), new_list);
+				}
+			}else if(!subjectAvailable && !objectAvailable && relFrameAvailable) {
+				onlyRelFrame++;
+				if(rel_frame_only.containsKey(triple.getSentenceToString())){
+					List<String> curr_list = rel_frame_only.get(triple.getSentenceToString());
+					curr_list.add(result);
+					rel_frame_only.put(triple.getSentenceToString(), curr_list);
+				}else {
+					List<String> new_list = new ArrayList<String>();
+					new_list.add(result);
+					rel_frame_only.put(triple.getSentenceToString(), new_list);
+				}
+			}
+			
+
+		}
+		
+		//Store canonical triples
+		tweet.setCanonicalTriples(canonicalTriples);
+		
+		System.out.println("Tweet Title: " + tweet.getTitle());
+		System.out.println();
+		
+		System.out.println("Total # of triples: " + triples.size());
+		
+		System.out.println("Total # of triples whose entities and relations have their canonical form: " + allPair);
+		System.out.println("Total # of triples whose entities have concepts and relations have no frames: " + matchingPair);
+		System.out.println("Total # of triples whose subjects have concepts in DBpedia: " + subonlyPair);
+		System.out.println("Total # of triples whose subjects and relations have their canonical form: " + subonlyWithFramePair);
+		System.out.println("Total # of triples whose objects have concepts in DBpedia: " + objonlyPair);
+		System.out.println("Total # of triples whose objects and relations have their canonical form: " + objonlyWithFramePair);
+		System.out.println("Total # of triples whose entities have no concepts in DBpedia: " + nonmatchingPair);
+		System.out.println("Total # of triples whose relations have corresponding frame in FrameNet: " + relFrameMatch);
+		System.out.println("Total # of triples whose relations have frame and entities have no concepts: " + onlyRelFrame);
+		
+		System.out.println();
+		System.out.println("Entities and Relation Frame in Sentences and Triples");
+		System.out.println();
+		getCorrespondingTriples(all);
+		
+		System.out.println();
+		System.out.println("Subject and Object Sentences and Triples");
+		System.out.println();
+		getCorrespondingTriples(both);
+		
+		System.out.println();
+		System.out.println("Subject Only Sentences and Triples");
+		System.out.println();
+		getCorrespondingTriples(subject_only);
+		
+		System.out.println();
+		System.out.println("Subject Only Sentences and Triples with Relation Frame");
+		System.out.println();
+		getCorrespondingTriples(rel_frame_subject_only);
+		
+		System.out.println();
+		System.out.println("Object Only Sentences and Triples");
+		System.out.println();
+		getCorrespondingTriples(object_only);
+		
+		System.out.println();
+		System.out.println("Object Only Sentences and Triples with Relation Frame");
+		System.out.println();
+		getCorrespondingTriples(rel_frame_object_only);
+		
+		System.out.println();
+		System.out.println("No Entities Sentences and Triples with Relation Frame");
+		System.out.println();
+		getCorrespondingTriples(rel_frame_only);
+		
+		System.out.println();
+		System.out.println("No Entities Sentences and Triples");
+		System.out.println();
+		getCorrespondingTriples(none);
+		
+		
+		// Generate gexf file for graph rendering
+		//GexfGraph graph = new GexfGraph();
+		//graph.createGraphFromTriples(triples);
+		//graph.exportGexfGraph("uncanonized");
+		
+		//GexfGraph graph1 = new GexfGraph();
+		//graph1.createGraphFromTriples(canonicalTriples);
+		//graph1.exportGexfGraph("canonized");
 		
 	}
 	
@@ -731,6 +1303,27 @@ public class AppWorker {
 		
 	}
 	
+	public static void generateGraphFromTweets(List<Tweet> tweets){
+		
+		List<MMKGRelationTriple> merged_triples = new ArrayList<MMKGRelationTriple>();
+		List<MMKGRelationTriple> merged_canonical_triples = new ArrayList<MMKGRelationTriple>();
+		
+		for(Tweet tweet : tweets) {
+			if(tweet.getTriples() != null) merged_triples.addAll(tweet.getTriples());
+			if(tweet.getCanonicalTriples() != null) merged_canonical_triples.addAll(tweet.getCanonicalTriples());
+		}
+		
+		GexfGraph graph = new GexfGraph();
+		graph.createGraphFromTriples(merged_triples);
+		graph.exportGexfGraph("uncanonized");
+		
+		GexfGraph graph2 = new GexfGraph();
+		graph2.createGraphFromTriples(merged_canonical_triples);
+		graph2.exportGexfGraph("canonized");
+		
+		
+	}
+	
 	public static void generateGraphFromArticles(List<Article> articles){
 		
 		List<MMKGRelationTriple> merged_triples = new ArrayList<MMKGRelationTriple>();
@@ -772,13 +1365,132 @@ public class AppWorker {
 	}
 	
 	/**
+	 * Returns tweets from the specific topic
+	 * 
+	 * @param topic Elasticsearch topic
+	 */
+	public static Map<String, Tweet> getTweetsFromTopic(String topic){
+		
+		Map<String, Tweet> tweets = new HashMap<String, Tweet>();
+		
+		SearchResponse response = ElasticController.getJSONHitsFromIndex(topic, "tweet");
+
+		SearchHit[] results = response.getHits().getHits();
+		
+		for(SearchHit hit : results) {
+			String tweet_id = hit.getId();
+			String source = hit.getSourceAsString();
+			try {
+				JSONObject sourceJSON = new JSONObject(source);
+				
+				Tweet tweet = new Tweet(tweet_id, (String) sourceJSON.get("title"), true, false);
+				
+				//Populating known entities properties of a tweet
+				ArrayList<String> known_entities = new ArrayList<String>();
+				
+				JSONArray entities = null;
+				try {
+					entities = sourceJSON.getJSONArray("entities");
+				}catch(Exception e){
+					
+				}	
+				
+				if(entities != null) {
+					for(int i = 0; i < entities.length(); i++) {
+						JSONObject obj = entities.getJSONObject(i);
+						String uri = obj.getString("uri");
+						known_entities.add(uri);
+					}		
+				}
+				
+				//Populating a timestamp of an article
+				String timestamp = (String) sourceJSON.get("timestamp");
+				Date parsedDate = DatatypeConverter.parseDateTime(timestamp).getTime();
+				tweet.setTimestamp(parsedDate);
+				tweet.setKnownEntities(known_entities);
+
+				//Finally add the article to the list
+				tweets.put(tweet_id, tweet);
+				
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
+		return tweets;
+		
+	}
+	
+	/**
+	 * @param topic Elasticsearch topic
+	 * @param start_date searches articles from this start date
+	 * @param end_date searches articles up to this end date
+	 */
+	public static Map<String, Tweet> getTweetsFromTopic(String topic, String start_date, String end_date){
+		
+		Map<String, Tweet> tweets = new HashMap<String, Tweet>();
+		
+		SearchResponse response = ElasticController.getJSONHitsFromIndex(topic, "tweet", start_date, end_date);
+
+		SearchHit[] results = response.getHits().getHits();
+		
+		for(SearchHit hit : results) {
+			String tweet_id = hit.getId();
+			String source = hit.getSourceAsString();
+			try {
+				JSONObject sourceJSON = new JSONObject(source);
+				
+				Tweet tweet = new Tweet(tweet_id, (String) sourceJSON.get("title"), true, false);
+				
+				//Populating known entities properties of a tweet
+				ArrayList<String> known_entities = new ArrayList<String>();
+				
+				JSONArray entities = null;
+				try {
+					entities = sourceJSON.getJSONArray("entities");
+				}catch(Exception e){
+					
+				}	
+				
+				if(entities != null) {
+					for(int i = 0; i < entities.length(); i++) {
+						JSONObject obj = entities.getJSONObject(i);
+						String uri = obj.getString("uri");
+						known_entities.add(uri);
+					}		
+				}
+				
+				//Populating a timestamp of an article
+				String timestamp = (String) sourceJSON.get("timestamp");
+				Date parsedDate = DatatypeConverter.parseDateTime(timestamp).getTime();
+				tweet.setTimestamp(parsedDate);
+				tweet.setKnownEntities(known_entities);
+
+				//Finally add the article to the list
+				tweets.put(tweet_id, tweet);
+				
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
+		return tweets;
+	}
+	
+	/**
+	 * Returns articles from the specific topic
+	 * 
 	 * @param topic Elasticsearch topic
 	 */
 	public static Map<String, Article> getArticlesFromTopic(String topic){
 		
 		Map<String, Article> articles = new HashMap<String, Article>();
 		
-		SearchResponse response = ElasticController.getJSONArticlesFromIndex(topic);
+		SearchResponse response = ElasticController.getJSONHitsFromIndex(topic, "article");
 
 		SearchHit[] results = response.getHits().getHits();
 		
@@ -840,7 +1552,7 @@ public class AppWorker {
 		
 		Map<String, Article> articles = new HashMap<String, Article>();
 		
-		SearchResponse response = ElasticController.getJSONArticlesFromIndex(topic, start_date, end_date);
+		SearchResponse response = ElasticController.getJSONHitsFromIndex(topic, "article", start_date, end_date);
 
 		SearchHit[] results = response.getHits().getHits();
 		

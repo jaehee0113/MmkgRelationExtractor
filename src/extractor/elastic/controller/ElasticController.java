@@ -49,25 +49,36 @@ public class ElasticController {
 		.setQuery(QueryBuilders.matchQuery("type", "tweet")).get();
 		
 	}	
-	
-	public static SearchResponse getJSONArticlesFromIndex(String topic){
-		
+	/**
+	 * Returns hits from the specific topic
+	 * 
+	 * @param topic Elasticsearch topic
+	 * @param type article or tweet
+	 */
+	public static SearchResponse getJSONHitsFromIndex(String topic, String type){
 		Map<String,String> topicDict = TopicDict.getTopicDict();
 		String index = String.format("mmkg-doc-%s", topicDict.get(topic));	
 		
 		return ElasticClient.getInstance().prepareSearch(index)
 		.setScroll(new TimeValue(60000))
 		.setSize(ElasticConfig.PAGE_SIZE)
-		.setQuery(QueryBuilders.matchQuery("type", "article")).get();
-		
+		.setQuery(QueryBuilders.matchQuery("type", type)).get();
 	}
 	
-	public static SearchResponse getJSONArticlesFromIndex(String topic, String start_date, String end_date){
+	/**
+	 * Returns hits from the specific topic
+	 * 
+	 * @param topic Elasticsearch topic
+	 * @param type article or tweet
+	 * @param start_date start date
+	 * @param end_date end date
+	 */
+	public static SearchResponse getJSONHitsFromIndex(String topic, String type, String start_date, String end_date){
 		Map<String,String> topicDict = TopicDict.getTopicDict();
 		String index = String.format("mmkg-doc-%s", topicDict.get(topic));	
 		
 		BoolQueryBuilder query = QueryBuilders.boolQuery()
-			.filter(QueryBuilders.matchQuery("type", "article"))
+			.filter(QueryBuilders.matchQuery("type", type))
 			.filter(QueryBuilders.rangeQuery("timestamp").from(start_date).to(end_date));
 		
 		return ElasticClient.getInstance().prepareSearch(index)

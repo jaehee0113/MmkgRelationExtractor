@@ -12,6 +12,7 @@ import static java.nio.charset.StandardCharsets.*;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import extractor.models.MMKGRelationTriple;
 import it.uniroma1.dis.wsngroup.gexf4j.core.Edge;
+import it.uniroma1.dis.wsngroup.gexf4j.core.EdgeType;
 import it.uniroma1.dis.wsngroup.gexf4j.core.Gexf;
 import it.uniroma1.dis.wsngroup.gexf4j.core.Graph;
 import it.uniroma1.dis.wsngroup.gexf4j.core.Node;
@@ -35,6 +36,8 @@ public class GexfGraph {
 	
 	public void setGraph(){
 		this.graph = gexf.getGraph();
+		//this.graph.setDefaultEdgeType(EdgeType.DIRECTED);
+		//this.graph.setDefaultEdgeType(EdgeType.UNDIRECTED);
 	}
 	
 	public Edge getEdge(String id){

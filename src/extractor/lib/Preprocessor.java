@@ -6,7 +6,9 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import extractor.models.Article;
+import extractor.models.Docu;
 import extractor.models.MMKGRelationTriple;
+import extractor.models.Tweet;
 
 public class Preprocessor {
 	
@@ -57,19 +59,65 @@ public class Preprocessor {
 		
 	}
 	
+	public static double get_tf(String term, Tweet tweet){
+		
+		List<MMKGRelationTriple> triples =  tweet.getCanonicalTriples();
+		
+		int freq = 0;
+		
+		if(triples != null) {
+			for(MMKGRelationTriple triple : triples){
+				List<String> possibilities = new ArrayList<String>();
+				possibilities.add(triple.getSubjectConcept());
+				possibilities.add(triple.getObjectConcept());
+				possibilities.add(triple.getRelationFrame());
+				
+				if(possibilities.indexOf(term) != -1) freq++;	
+			}	
+		}
+		
+		return freq;
+		
+	}
+	
+	public static <T> double get_tf(String term, T document){
+		
+		List<MMKGRelationTriple> triples = null;
+		
+     	if(document instanceof Article)
+       		triples = ((Article) document).getTriples();
+       	else
+       		triples = ((Tweet) document).getTriples();
+		
+		int freq = 0;
+		
+		if(triples != null) {
+			for(MMKGRelationTriple triple : triples){
+				List<String> possibilities = new ArrayList<String>();
+				possibilities.add(triple.getSubjectConcept());
+				possibilities.add(triple.getObjectConcept());
+				possibilities.add(triple.getRelationFrame());
+				
+				if(possibilities.indexOf(term) != -1) freq++;	
+			}	
+		}
+		
+		return freq;
+		
+	}
+	
     /**
      * Returns term frequency of a term in an article.
      * @param term canonical version of a term
      * @param document list of articles (document)
      * @return
      */
-	public static double get_idf(String term, List<Article> document){
-		double document_size = document.size();
-		
+	public static <T> double get_idf(String term, List<T> documents){
+		double document_size = documents.size();
 		double num_art_freq = 1;
 		
-		for(Article art : document){
-			double term_freq = get_tf(term, art);
+		for(T document : documents){
+			double term_freq = get_tf(term, document);
 			if(term_freq != 0) num_art_freq++;
 		}
 		
@@ -77,6 +125,7 @@ public class Preprocessor {
 		
 		return Math.log(arg);
 	}
+
 
     /**
      * Returns TF-IDF of a term.

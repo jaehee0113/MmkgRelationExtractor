@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.Set;
 
 import extractor.models.Article;
+import extractor.models.IModel;
 import extractor.models.MMKGRelationTriple;
+import extractor.models.Tweet;
 
 
 public class FileProcessor {
@@ -26,18 +28,23 @@ public class FileProcessor {
         f.read(buffer);
         return new String(buffer);
     }
-    
-    public static List<String> getSentencesFromArticle(Article article){
-    	
-    	List<String> sentences = new ArrayList<String>();
-    	List<MMKGRelationTriple> triples = article.getTriples();
+     
+    public static <T> List<String> getSentencesFromDocument(T elem){
+       	List<String> sentences = new ArrayList<String>();
+       	
+       	List<MMKGRelationTriple> triples = null;
+       	
+       	
+       	if(elem instanceof Article)
+       		triples = ((Article) elem).getTriples();
+       	else
+       		triples = ((Tweet) elem).getTriples();
     	
     	for(MMKGRelationTriple triple: triples){
     		sentences.add(triple.getSentenceToString());
     	}
     	
     	return sentences;
-    	
     }
     
     //used for generating text file of sentences of an article

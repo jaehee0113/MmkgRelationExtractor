@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
 import extractor.models.Article;
+import extractor.models.Tweet;
 
 public class Application extends AppWorker{
 	
@@ -17,17 +18,28 @@ public class Application extends AppWorker{
 	
 	public static void main(String[] args) throws UnknownHostException, InterruptedException, JSONException {
 		
+		boolean condense_graph = true;
+		
 		long startTime = System.currentTimeMillis();
 		
-		List<Article> graphized_articles = new ArrayList<Article>();
+		//List<Article> graphized_articles = new ArrayList<Article>();
+		List<Tweet> graphized_tweets = new ArrayList<Tweet>();
 		
 		//Map<String, Article> articles = getArticlesFromTopic("beef_ban");
-		Map<String, Article> articles = getArticlesFromTopic("beef_ban", "2017-07-07", "2017-07-15");
+		//Map<String, Article> articles = getArticlesFromTopic("beef_ban", "2017-07-02", "2017-07-20");
+	
+		Map<String, Tweet> tweets = getTweetsFromTopic("beef_ban", "2017-07-02", "2017-07-03");
+		
+		for (Map.Entry<String, Tweet> e : tweets.entrySet()) {
+			Tweet curr_tweet = e.getValue();
+			process(curr_tweet);			
+			graphized_tweets.add(curr_tweet);
+		}
 		
 		// Only use this if you want specific articles
-		
 		/*
 		String[] chosen_articles = {
+			"article-uuid-5ec20b867c626ca012df0550082665b79fd6f3ee",	
 			"mmkg-article-2eda01a81adeb6531351d0002b6766dda34b9366",
 			"mmkg-article-0cc0255113819386cc8d22a3f58b21b7d0c7d84e",
 			"article-uuid-ed9a0052f55f59fb264a07ef7e6389aaa0e84eec",
@@ -40,17 +52,22 @@ public class Application extends AppWorker{
 			graphized_articles.add(article);
 		}
 		*/
-		
+		/*
 		for (Map.Entry<String, Article> e : articles.entrySet()) {
 			Article curr_article = e.getValue();
-			process(curr_article);
+			process(curr_article);			
 			graphized_articles.add(curr_article);
 		}
+		*/
 		
-		generateGraphFromArticles(graphized_articles);
+		if(condense_graph){
+			condense_graphs(graphized_tweets, false);
+		}
 		
+		generateGraphFromTweets(graphized_tweets);
+
 		long estimatedTime = System.currentTimeMillis() - startTime;
 		
-		System.out.println("Time taken to generate both canonical and non-canonical graph from " + articles.size() + " articles:" + estimatedTime);
+		System.out.println("Time taken to generate both canonical and non-canonical graph from " + tweets.size() + " tweets:" + estimatedTime);
 	}
 }

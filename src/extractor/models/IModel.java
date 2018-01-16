@@ -17,6 +17,8 @@ public interface IModel {
 	
 	public List<String> getRelations();
 	
+	public List<MMKGRelationTriple> getCanonicalTriples();
+	
 	public String getTitle();
 	
 	public String getDescription();
