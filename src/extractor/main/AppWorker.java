@@ -6,14 +6,18 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -731,7 +735,139 @@ public class AppWorker {
 		
 	}
 	
-	public static void generateGraphFromArticles(List<Article> articles){
+	  private static String readAll(Reader rd) throws IOException {
+	    StringBuilder sb = new StringBuilder();
+	    int cp;
+	    while ((cp = rd.read()) != -1) {
+	      sb.append((char) cp);
+	    }
+	    return sb.toString();
+	  }
+
+	  public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
+	    InputStream is = new URL(url).openStream();
+	    try {
+	      BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+	      String jsonText = readAll(rd);
+	      JSONObject json = new JSONObject(jsonText);
+	      return json;
+	    } finally {
+	      is.close();
+	    }
+	  }
+	  
+	  public static String getLastBitFromUrl(final String url){
+		    // return url.replaceFirst("[^?]*/(.*?)(?:\\?.*)","$1);" <-- incorrect
+		    return url.replaceFirst(".*/([^/?]+).*", "$1");
+		}
+	
+    /**
+     * Find entities (via a relationship) that do not exist in DBpedia.
+     *  
+     * @param canonical_triples canonical triples it found from articles fetched.
+     */
+	public static void findUnknownTriplesFromDBPedia(List<MMKGRelationTriple> canonical_triples){
+		
+		//Go through the triple and generate a HashMap containing key as the entity name and value as another hashmap that
+		//has key as a relation name (from DBpedia) and value as the an entity
+		//We will only get the entity from subjects set
+		
+		ArrayList<String> subject_concepts = new ArrayList<String>();
+		
+		for(MMKGRelationTriple triple : canonical_triples){
+			
+			String entity_name = getLastBitFromUrl(triple.getSubjectConcept());
+			
+			if(!subject_concepts.contains(entity_name))
+				subject_concepts.add(entity_name);
+		}
+		
+		//< Subject, <Object, <Relation>>
+		Map<String, Map<String, List<String>>> result = new HashMap<String, Map<String, List<String>>>();
+		
+		for(String concept: subject_concepts){
+			try {
+				JSONObject json = readJsonFromUrl("http://dbpedia.org/data/" + concept + ".json");
+				Iterator<?> keys = json.keys();
+				
+				Map<String, List<String>> sub_result = new HashMap<String, List<String>>();
+				while(keys.hasNext()){
+					String key = (String) keys.next();
+					if(key.contains("http://dbpedia.org/resource/")){
+						Iterator<?> relations = json.getJSONObject(key).keys();
+						List<String> relation_list = new ArrayList<String>();
+						while(relations.hasNext()){
+							String relation = (String) relations.next();
+							relation_list.add(getLastBitFromUrl(relation));
+							
+						}
+						sub_result.put(getLastBitFromUrl(key), relation_list);
+					}
+				}
+				
+				result.put(concept, sub_result);
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		//Checking all the triples from KB (i.e. DBpedia)
+		/*
+		for (Map.Entry<String, Map<String, List<String>>> e : result.entrySet()) {
+			System.out.println("============================");
+			System.out.println("Subject: " + e.getKey());
+			
+			Map<String, List<String>> obj_rels = e.getValue();
+			
+			for (Map.Entry<String, List<String>> f : obj_rels.entrySet()) {
+				
+				System.out.println("Object: " + f.getKey());
+				
+				int count = 0;
+				
+				for(String relation : f.getValue()) {
+					++count;
+					System.out.println("Relation #" + count + ": " + relation);
+				}
+				
+			}
+			System.out.println("============================");
+			
+		}
+		*/
+		//Now get the current triples and compare
+		for(MMKGRelationTriple triple : canonical_triples){
+			
+			String subj_name = getLastBitFromUrl(triple.getSubjectConcept());
+			String obj_name = getLastBitFromUrl(triple.getObjectConcept());
+			
+			//Get object and relations pair of the subject
+			Map<String, List<String>> obj_rels = result.get(subj_name);
+			
+			//Get list of relations if obj found from DB
+			if(obj_rels.get(obj_name) != null){
+				//FOUND
+				System.out.println("Object found: " + obj_name);
+				//List<String> relations = obj_rels.get(obj_name);
+				//
+				//for(String rel: relations){
+				//	System.out.println(rel);
+				//}
+			}else{
+				//NOT FOUND
+				System.out.println("Object not found: " + obj_name);
+			}
+			
+		}
+		
+	}
+	
+	public static List<MMKGRelationTriple> generateGraphFromArticles(List<Article> articles){
 		
 		List<MMKGRelationTriple> merged_triples = new ArrayList<MMKGRelationTriple>();
 		List<MMKGRelationTriple> merged_canonical_triples = new ArrayList<MMKGRelationTriple>();
@@ -749,6 +885,8 @@ public class AppWorker {
 		graph2.createGraphFromTriples(merged_canonical_triples);
 		graph2.exportGexfGraph("canonized");
 		
+		
+		return merged_canonical_triples;
 		
 	}
 	
