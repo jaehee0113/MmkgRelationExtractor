@@ -48,6 +48,38 @@ Installation Instructions
 > - Run local server to run the application locally.
 > - Go to app folder for more detailed instruction.
 
+### When exporting in jar file
+
+> - make sure to install 3rd party JARs if they are not in the Maven central repository.
+
+```sh
+mvn install:install-file -Dfile=matlabcontrol-4.1.0.jar -DgroupId=org.matlabcontrol \
+    -DartifactId=matlabcontrol -Dversion=4.1.0 -Dpackaging=jar
+```
+
+```sh
+ <dependency>
+        <groupId>org.matlabcontrol</groupId>
+        <artifactId>matlabcontrol</artifactId>
+        <version>4.1.0</version>
+ </dependency>
+```
+
+Therefore, make sure to go through this step for the following:
+
+```sh
+mvn install:install-file -Dfile=external/stanford-corenlp-3.8.0-models.jar -DgroupId=edu.stanford.nlp -DartifactId=stanford-corenlp-models -Dversion=3.8.0 -Dpackaging=jar
+```
+
+In Maven, you need to specify goal as "package." Any dependencies using 'system path' would not work.
+
+WHen running jar:
+
+```sh
+ java -Xms6g -Xmx6g -cp MmkgRelationExtractor-0.0.1-SNAPSHOT-jar-with-dependencies.jar extractor.main.Application "beef_ban" "2017-07-07" "2017-07-07"
+```
+(depending on the heap memory your computer has - change Xms and Xmx variables)
+
 Application Structure
 ---------------------
 
