@@ -12,6 +12,7 @@ import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.simple.Document;
 import edu.stanford.nlp.simple.Sentence;
+import extractor.semafor.config.SemaforConfig;
 
 /*
  * 
@@ -53,7 +54,7 @@ public class Article extends Docu implements IModel{
 		
 		try {
 			@SuppressWarnings("resource")
-			BufferedReader br = new BufferedReader(new FileReader("src/extractor/lib/files/" + this.getDocumentID() + "-completed.txt"));
+			BufferedReader br = new BufferedReader(new FileReader(SemaforConfig.INPUT_FILE_DIR + this.getDocumentID() + "-completed.txt"));
 			String line = null;
 			while((line = br.readLine()) != null) {
 				Sentence sent = new Sentence(line);

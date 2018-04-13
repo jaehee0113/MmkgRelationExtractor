@@ -14,9 +14,51 @@
           <target>1.8</target>
         </configuration>
       </plugin>
+      <plugin>
+	      <!-- Build an executable JAR -->
+	      <groupId>org.apache.maven.plugins</groupId>
+	      <artifactId>maven-jar-plugin</artifactId>
+	      <version>3.0.2</version>
+	      <configuration>
+	        <archive>
+	          <manifest>
+	            <addClasspath>true</addClasspath>
+	            <classpathPrefix>lib/</classpathPrefix>
+	            <mainClass>extractor.main.Application</mainClass>
+	          </manifest>
+	        </archive>
+	      </configuration>
+	    </plugin>
+	    <plugin>
+		  <artifactId>maven-assembly-plugin</artifactId>
+		  <configuration>
+		    <archive>
+		      <manifest>
+		        <mainClass>extractor.main.Application</mainClass>
+		      </manifest>
+		    </archive>
+		    <descriptorRefs>
+		      <descriptorRef>jar-with-dependencies</descriptorRef>
+		    </descriptorRefs>
+		  </configuration>
+		  <executions>
+		    <execution>
+		      <id>make-assembly</id> <!-- this is used for inheritance merges -->
+		      <phase>package</phase> <!-- bind to the packaging phase -->
+		      <goals>
+		        <goal>single</goal>
+		      </goals>
+		    </execution>
+		  </executions>
+		</plugin>
     </plugins>
   </build>
     <dependencies>
+    	<dependency>
+		    <groupId>org.json</groupId>
+		    <artifactId>json</artifactId>
+		    <version>20180130</version>
+		</dependency>
 	    <dependency>
 		    <groupId>org.elasticsearch.client</groupId>
 		    <artifactId>transport</artifactId>
@@ -65,11 +107,19 @@
 	  		</exclusions>
 		 </dependency>
 		 <dependency>
-		 	  <groupId>MmkgRelationExtractor</groupId>
-  			  <artifactId>MmkgRelationExtractor</artifactId>
-  			  <version>1.0</version>
-  			  <scope>system</scope>
-  			  <systemPath>${project.basedir}/src/main/resources/dbpedia-spotlight-1.0.0.jar</systemPath>
+		 	  <groupId>edu.stanford.nlp</groupId>
+  			  <artifactId>stanford-corenlp-models</artifactId>
+  			  <version>3.8.0</version>
+		 </dependency>
+		 <dependency>
+		 	  <groupId>edu.stanford.nlp</groupId>
+  			  <artifactId>stanford-corenlp-sources</artifactId>
+  			  <version>3.8.0</version>
+		 </dependency>
+		 <dependency>
+		 	  <groupId>org.dbpedia</groupId>
+  			  <artifactId>dbpedia.spotlight</artifactId>
+  			  <version>1.0.0</version>
 		 </dependency>
 		 <dependency>
 		 	  <groupId>it.uniroma1.dis.wsngroup.gexf4j</groupId>

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
+
 import extractor.models.Article;
 
 public class Application extends AppWorker{
@@ -17,12 +18,22 @@ public class Application extends AppWorker{
 	
 	public static void main(String[] args) throws UnknownHostException, InterruptedException, JSONException {
 		
+		//Parameters that users pass in 
+		String topic = args[0];
+		String start_date = args[1];
+		String end_date = args[2];
+		
 		long startTime = System.currentTimeMillis();
 		
 		List<Article> graphized_articles = new ArrayList<Article>();
+		Map<String, Article> articles = new HashMap<String, Article>();
 		
 		//Map<String, Article> articles = getArticlesFromTopic("beef_ban");
-		Map<String, Article> articles = getArticlesFromTopic("beef_ban", "2017-07-07", "2017-07-15");
+		if(start_date != null)
+			articles = getArticlesFromTopic(topic, start_date, end_date);
+		else
+			articles = getArticlesFromTopic(topic);
+			
 		
 		// Only use this if you want specific articles
 		

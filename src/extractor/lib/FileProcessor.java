@@ -15,6 +15,7 @@ import java.util.Set;
 
 import extractor.models.Article;
 import extractor.models.MMKGRelationTriple;
+import extractor.semafor.config.SemaforConfig;
 
 
 public class FileProcessor {
@@ -44,7 +45,7 @@ public class FileProcessor {
     public static void writeFile(List<String> sentences, String out_file_name){
     	    	
     	try {
-			PrintWriter writer = new PrintWriter("src/extractor/lib/files/" + out_file_name + ".txt", "UTF-8");
+			PrintWriter writer = new PrintWriter(SemaforConfig.INPUT_FILE_DIR + out_file_name + ".txt", "UTF-8");
 			
 			for(String sent: sentences){
 				writer.println(sent);

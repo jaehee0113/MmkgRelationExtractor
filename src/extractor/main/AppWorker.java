@@ -209,10 +209,10 @@ public class AppWorker {
 	public static void postprocess(Article article){
 		
 		//We do not need these files anymore (just used for preprocessing)
-		File file = new File("src/extractor/lib/files/" + article.getDocumentID() + ".txt");
-		File file1 = new File("src/extractor/lib/files/" + article.getDocumentID() + "-complete.txt");
-		File file2 = new File("src/extractor/lib/files/" + article.getDocumentID() + "-pruned.txt");
-		File file3 = new File("src/extractor/lib/files/" + article.getDocumentID() + "-completed.txt");
+		File file = new File(SemaforConfig.INPUT_FILE_DIR + article.getDocumentID() + ".txt");
+		File file1 = new File(SemaforConfig.INPUT_FILE_DIR + article.getDocumentID() + "-complete.txt");
+		File file2 = new File(SemaforConfig.INPUT_FILE_DIR + article.getDocumentID() + "-pruned.txt");
+		File file3 = new File(SemaforConfig.INPUT_FILE_DIR + article.getDocumentID() + "-completed.txt");
 
 		
 		file.delete();
@@ -228,8 +228,8 @@ public class AppWorker {
 			FileProcessor.writeFile(sentences, article.getDocumentID());
 			
 			//Remove empty lines
-			BufferedReader br = new BufferedReader(new FileReader("src/extractor/lib/files/" + article.getDocumentID() + ".txt"));
-			PrintWriter outputFile = new PrintWriter(new FileWriter("src/extractor/lib/files/" + article.getDocumentID() + "-pruned.txt"));
+			BufferedReader br = new BufferedReader(new FileReader(SemaforConfig.INPUT_FILE_DIR + article.getDocumentID() + ".txt"));
+			PrintWriter outputFile = new PrintWriter(new FileWriter(SemaforConfig.INPUT_FILE_DIR + article.getDocumentID() + "-pruned.txt"));
 			
 			String line = null;
 			while((line = br.readLine()) != null) {
@@ -244,8 +244,8 @@ public class AppWorker {
 			outputFile.close();
 			
 			// . if the end of line does not end with it.
-			PrintWriter outputFile2 = new PrintWriter(new FileWriter("src/extractor/lib/files/" + article.getDocumentID() + "-complete.txt"));
-			BufferedReader br2 = new BufferedReader(new FileReader("src/extractor/lib/files/" + article.getDocumentID() + "-pruned.txt"));
+			PrintWriter outputFile2 = new PrintWriter(new FileWriter(SemaforConfig.INPUT_FILE_DIR + article.getDocumentID() + "-complete.txt"));
+			BufferedReader br2 = new BufferedReader(new FileReader(SemaforConfig.INPUT_FILE_DIR + article.getDocumentID() + "-pruned.txt"));
 			String line2 = null;
 			while((line2 = br2.readLine()) != null) {
 				
@@ -261,7 +261,7 @@ public class AppWorker {
 			outputFile2.close();
 			
 			//Remove duplicate lines
-			BufferedReader br3 = new BufferedReader(new FileReader("src/extractor/lib/files/" + article.getDocumentID() + "-complete.txt"));
+			BufferedReader br3 = new BufferedReader(new FileReader(SemaforConfig.INPUT_FILE_DIR + article.getDocumentID() + "-complete.txt"));
 			Set<String> lines = new HashSet<String>(10000);
 			String line5;
 			while ((line5 = br3.readLine()) != null) {
@@ -270,7 +270,7 @@ public class AppWorker {
 			
 			br3.close();
 			
-			BufferedWriter outputFile3 = new BufferedWriter(new FileWriter("src/extractor/lib/files/" + article.getDocumentID() + "-completed.txt"));
+			BufferedWriter outputFile3 = new BufferedWriter(new FileWriter(SemaforConfig.INPUT_FILE_DIR + article.getDocumentID() + "-completed.txt"));
 			for (String unique : lines) {
 			   outputFile3.write(unique);
 			   outputFile3.newLine();
@@ -386,7 +386,7 @@ public class AppWorker {
     			String[] cmd2 = {
     					"/bin/sh",
     					"-c",
-    					"cat /home/admin-u4722839/Desktop/semafor/output/conll | nc localhost 8888"
+    					"cat /home/ubuntu/semafor/semafor/output/conll | nc 130.56.248.107 8888"
     			};
     			
     			
