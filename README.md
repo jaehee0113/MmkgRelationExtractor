@@ -73,12 +73,35 @@ mvn install:install-file -Dfile=external/stanford-corenlp-3.8.0-models.jar -Dgro
 
 In Maven, you need to specify goal as "package." Any dependencies using 'system path' would not work.
 
-WHen running jar:
+When running jar:
 
 ```sh
- java -Xms6g -Xmx6g -cp MmkgRelationExtractor-0.0.1-SNAPSHOT-jar-with-dependencies.jar extractor.main.Application "beef_ban" "2017-07-07" "2017-07-07"
+ java -Xms7g -Xmx7g -cp MmkgRelationExtractor-0.0.1-SNAPSHOT-jar-with-dependencies.jar extractor.main.Application "beef_ban" "2017-07-07" "2017-07-07"
 ```
 (depending on the heap memory your computer has - change Xms and Xmx variables)
+
+It is possible that multiple errors may occur during this stage. Few errors encountered include:
+
+```sh
+engmalt.linear-1.7.mco not found
+```
+
+Highly likely that the directory for malt model is incorrect.
+
+```sh
+exited with error 127 (or sometimes 126)    
+```
+
+This means that you should set the sh file into unix format by
+
+```sh
+vim ***.sh
+:set fileformat:unix
+:wq!
+```
+
+
+
 
 Application Structure
 ---------------------
