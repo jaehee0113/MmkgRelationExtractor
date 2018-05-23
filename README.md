@@ -114,6 +114,10 @@ Under this package, core object models are defined including Article, Tweet and 
 
 Under this package, files necessary for Semafor API are defined.
 
+#### NRE
+
+Under this package, files necessary for exporting results into data structure for Neural Relation Extraction application are defined.
+
 #### Elastic
 
 Under this package, files necessary for ElasticSearch are defined. Note that the client connects to the ANU internal server so there may be some problem accessing the server outside the ANU. Indexes are defined in **elastic.lib.TopicDict**.
