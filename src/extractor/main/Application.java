@@ -9,6 +9,8 @@ import java.util.Set;
 import org.json.JSONException;
 
 import extractor.models.Article;
+import extractor.nre.config.NREConfig;
+import extractor.nre.controller.NREController;
 
 public class Application extends AppWorker{
 	
@@ -19,9 +21,10 @@ public class Application extends AppWorker{
 	public static void main(String[] args) throws UnknownHostException, InterruptedException, JSONException {
 		
 		//Parameters that users pass in 
-		String topic = args[0];
-		String start_date = args[1];
-		String end_date = args[2];
+		String topic = "beef_ban";
+		String start_date = "2017-07-01";
+		String end_date = "2017-07-01";
+		String purpose = "nre";
 		
 		long startTime = System.currentTimeMillis();
 		
@@ -52,16 +55,36 @@ public class Application extends AppWorker{
 		}
 		*/
 		
-		for (Map.Entry<String, Article> e : articles.entrySet()) {
-			Article curr_article = e.getValue();
-			process(curr_article);
-			graphized_articles.add(curr_article);
+		/*
+		 *  File output for neural relation extraction (NRE) - data preparation
+		 */
+		if(purpose == "nre"){
+			
+			NREController.createFile(topic + "_" + start_date + "_" + end_date);
+			
+			//Populate triples (subjects and objects per sentence)
+			for (Map.Entry<String, Article> e : articles.entrySet()) {
+				Article curr_article = e.getValue();
+				curr_article.populateTriples();
+				NREController.writeLine(curr_article,topic + "_" + start_date + "_" + end_date);
+			}
+			
 		}
 		
-		generateGraphFromArticles(graphized_articles);
-		
-		long estimatedTime = System.currentTimeMillis() - startTime;
-		
-		System.out.println("Time taken to generate both canonical and non-canonical graph from " + articles.size() + " articles:" + estimatedTime);
+		/*
+		 *  OpenIE extraction part
+		 */
+		if(purpose == "openie") {
+			for (Map.Entry<String, Article> e : articles.entrySet()) {
+				Article curr_article = e.getValue();
+				process(curr_article);
+				graphized_articles.add(curr_article);
+			}
+			
+			generateGraphFromArticles(graphized_articles);
+			
+			long estimatedTime = System.currentTimeMillis() - startTime;
+			System.out.println("Time taken to generate both canonical and non-canonical graph from " + articles.size() + " articles:" + estimatedTime);
+		}
 	}
 }
