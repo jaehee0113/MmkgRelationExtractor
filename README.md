@@ -3,7 +3,7 @@ MMKG Relation extractor
 
 **(A part of the picturing knowledge project at the ANU Computational Media Lab)**
 
-**Latest version**: v2.4.0
+**Latest version**: v2.5.0
 
 **Author**: Jae Hee Lee
 
@@ -215,6 +215,11 @@ Now the application should be run successfully.
 
 History
 -------
+
+v 2.5
+
+> - Exporting into data structure used for neural relation extraction application added.
+> - Modified to export application into jar file added.
 
 v 2.4
 
